@@ -3,6 +3,9 @@ project(Game)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(FMOD_SDK_PATH "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows")
+set(FMOD_API_PATH "${FMOD_SDK_PATH}/api/core")
+
 add_executable(Game main.cpp
         src/Game/Game.cpp
         src/Game/Game.h
@@ -20,9 +23,19 @@ add_executable(Game main.cpp
 target_link_options(Game PRIVATE "/SUBSYSTEM:CONSOLE")
 
 include_directories($ENV{DXSDK_DIR}/Include)
+include_directories("${FMOD_API_PATH}/inc")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(FMOD_LIB_NAME "fmodL_vc")
+    set(FMOD_DLL_NAME "fmodL.dll")
+else()
+    set(FMOD_LIB_NAME "fmod_vc")
+    set(FMOD_DLL_NAME "fmod.dll")
+endif()
 
 target_link_options(Game PRIVATE
         "/LIBPATH:$ENV{DXSDK_DIR}/Lib/x86"
+        "/LIBPATH:${FMOD_API_PATH}/lib/x86"
 )
 
 target_link_libraries(Game
@@ -30,11 +43,21 @@ target_link_libraries(Game
         d3dx9
         dinput8
         dxguid
+        ${FMOD_LIB_NAME}
 )
 
 set(GAME_ASSETS
         # add asset files here
         assets/practical9.png
+)
+
+add_custom_command(
+        TARGET Practical_1
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${FMOD_API_PATH}/lib/x86/${FMOD_DLL_NAME}"
+        "$<TARGET_FILE_DIR:Practical_1>"
+        COMMENT "Copying FMOD DLL: ${FMOD_DLL_NAME}"
 )
 
 foreach (asset_file IN LISTS GAME_ASSETS)
