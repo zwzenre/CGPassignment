@@ -14,7 +14,9 @@ add_executable(Game main.cpp
         src/Timer/Timer.cpp
         src/Timer/Timer.h
         src/Manager/SceneManager.cpp
-        src/Manager/SceneManager.h)
+        src/Manager/SceneManager.h
+        src/Manager/SoundManager.cpp
+        src/Manager/SoundManager.h)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
@@ -52,11 +54,11 @@ set(GAME_ASSETS
 )
 
 add_custom_command(
-        TARGET Practical_1
+        TARGET Game
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${FMOD_API_PATH}/lib/x86/${FMOD_DLL_NAME}"
-        "$<TARGET_FILE_DIR:Practical_1>"
+        "$<TARGET_FILE_DIR:Game>"
         COMMENT "Copying FMOD DLL: ${FMOD_DLL_NAME}"
 )
 
