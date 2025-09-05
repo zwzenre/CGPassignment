@@ -6,11 +6,13 @@
 #include <dinput.h>
 #include "src/Timer/Timer.h"
 #include "src/Manager/InputManager.h"
+#include "src/Manager/SoundManager.h"
 using namespace std;
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
+
 
 
 HRESULT hr;
@@ -84,7 +86,8 @@ LPDIRECTINPUTDEVICE8 dInputKeyboardDevice;
 LPDIRECTINPUTDEVICE8 dInputMouseDevice;
 
 Timer frameTimer = Timer();
-InputManager input = InputManager();
+SoundManager * soundManager = new SoundManager();
+InputManager * inputManager = new InputManager();
 #define FPS 120
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -399,15 +402,24 @@ bool RectangleCollisionDetection(RECT a, RECT b) {
 }
 
 void CircleCollisionDetection() {
-    int radius1 = player1SpriteWidth / 2;
-    int radius2 = player2SpriteWidth / 2;
-    float disX = player1Pos.x - player2Pos.x;
-    float disY = player1Pos.y - player2Pos.y;
-    float distance = sqrt((disX * disX) + (disY * disY));
+    int radius1 = player1SpriteWidth / 2 * playerScaling.x;
+    int radius2 = player2SpriteWidth / 2 * playerScaling.x;
+    D3DXVECTOR2 distance = player1Pos - player2Pos;
+    float dist = sqrt((distance.x * distance.x) + (distance.y * distance.y));
 
-    if (radius1 + radius2 > distance) {
+    if (radius1 + radius2 > dist) {
         std::cout << "Collision Detected" << std::endl;
-        player1Velocity *= -1;
+
+        D3DXVECTOR2 normalisedDistance;
+
+        // Normalize the perpendicular vector
+        D3DXVec2Normalize(&normalisedDistance, &distance);
+        D3DXVECTOR2 reflectionDirection = D3DXVec2Dot(&player1Velocity, &normalisedDistance) * normalisedDistance;
+        player1Velocity = player1Velocity - reflectionDirection * 2;
+        // Change vector to BounceForce
+        //player2Velocity = player1Velocity * -1;
+
+        soundManager->PlaySound1(1, player1Pos.x / (float)windowWidth * 2 - 1);
     }
 }
 
@@ -415,8 +427,12 @@ int main(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nSho
     if(Initialization())
         return 0;
 
+    soundManager->InitializeAudio();
+    soundManager->LoadSounds();
+    soundManager->PlaySoundTrack();
+
     while (WindowIsRunning()) {
-        Input(); //input.GetDevice();
+        Input();
         Update(frameTimer.FramesToUpdate());
         Render();
     }
