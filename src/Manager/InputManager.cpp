@@ -1,4 +1,4 @@
-#include "../Header/InputManager.h"
+#include "Header/InputManager.h"
 
 void InputManager::GetDevice() {
     dInputKeyboardDevice->GetDeviceState(256, diKeys);

@@ -1,4 +1,4 @@
-#include "../Header/SoundManager.h"
+#include "Header/SoundManager.h"
 
 void SoundManager::InitializeAudio() {
     result = FMOD::System_Create(&system);
