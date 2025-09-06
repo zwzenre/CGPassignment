@@ -16,7 +16,11 @@ add_executable(Game main.cpp
         src/Manager/SceneManager.cpp
         src/Manager/SceneManager.h
         src/Manager/SoundManager.cpp
-        src/Manager/SoundManager.h)
+        src/Manager/SoundManager.h
+        src/RaceCar.cpp
+        src/RaceCar.h
+        src/PhysicsManager.cpp
+        src/PhysicsManager.h)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
