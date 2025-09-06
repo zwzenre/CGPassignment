@@ -4,9 +4,9 @@
 #include <iostream>
 #include <string>
 #include <dinput.h>
-#include "src/Timer/Timer.h"
-#include "src/Manager/InputManager.h"
-#include "src/Manager/SoundManager.h"
+#include "src/Timer/Header/Timer.h"
+#include "src/Header/InputManager.h"
+#include "src/Header/SoundManager.h"
 using namespace std;
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "d3dx9.lib")
