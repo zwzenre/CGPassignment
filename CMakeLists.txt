@@ -8,15 +8,25 @@ set(FMOD_API_PATH "${FMOD_SDK_PATH}/api/core")
 
 add_executable(Game main.cpp
         src/Game/Game.cpp
-        src/Game/Game.h
+        src/Game/Header/Game.h
         src/Manager/InputManager.cpp
-        src/Manager/InputManager.h
+        src/Manager/Header/InputManager.h
         src/Timer/Timer.cpp
-        src/Timer/Timer.h
+        src/Timer/Header/Timer.h
         src/Manager/SceneManager.cpp
-        src/Manager/SceneManager.h
+        src/Manager/Header/SceneManager.h
         src/Manager/SoundManager.cpp
-        src/Manager/SoundManager.h)
+        src/Manager/Header/SoundManager.h
+        src/Manager/PhysicsManager.cpp
+        src/Manager/Header/PhysicsManager.h
+        src/Game/Level.cpp
+        src/Game/Header/Level.h
+        src/Game/Map.cpp
+        src/Game/Header/Map.h
+        src/Game/Obstacle.cpp
+        src/Game/Header/Obstacle.h
+        src/Game/RaceCar.cpp
+        src/Game/Header/RaceCar.h)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
