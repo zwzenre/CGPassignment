@@ -19,14 +19,14 @@ public:
     void initialization();
     void update(float deltaTime);
     bool checkCollision(const D3DXVECTOR2& objectPos, float radius, const D3DXVECTOR2& otherPos, float otherRadius);
-    void resolveCollision(const CollisionInfo& collisionInfo);
+    // void resolveCollision(CollisionInfo * collisionInfo);
     void applyPhysics(float deltaTime);
 
     D3DXVECTOR2 getPosition();
-    void setPosition;
+    void setPosition();
 
     D3DXVECTOR2 getVelocity;
-    void setVelocity;
+    void setVelocity();
 
     float getSpeed();
     void setSpeed();
