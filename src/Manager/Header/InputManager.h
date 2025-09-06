@@ -3,6 +3,8 @@
 
 class InputManager {
 public:
+    InputManager();
+    //~InputManager();
     void GetDevice();
 
 private:
@@ -12,5 +14,7 @@ private:
     LPDIRECTINPUT8 dInput;
     LPDIRECTINPUTDEVICE8 dInputKeyboardDevice;
     LPDIRECTINPUTDEVICE8 dInputMouseDevice;
+
+    HRESULT hr;
 };
 
