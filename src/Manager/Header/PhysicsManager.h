@@ -1,43 +1,27 @@
 #pragma once
-#include "../../Game/Header/RaceCar.h"
 #include <d3dx9.h>
 #include <vector>
 
-#ifndef GAME_PHYSICSMANAGER_H
-#define GAME_PHYSICSMANAGER_H
-
-
 class PhysicsManager {
-private:
-    float speed;
-    D3DXVECTOR2 initial;
-    bool collision;
-
 public:
-    PhysicsManager(float initialSpeed = 0.0f, D3DXVECTOR2 initialPos = D3DXVECTOR2(0.0f, 0.0f), bool enableCollision = true);
+    // 移除单一物体属性，改为管理多个物体
+    std::vector<class GameObject*> physicsObjects; // 需要一个GameObject基类
 
-    void initialization();
+
+    PhysicsManager();
+    ~PhysicsManager();
+
+    void initialization(); // Game.cpp中调用的方法
     void update(float deltaTime);
-    bool checkCollision(const D3DXVECTOR2& objectPos, float radius, const D3DXVECTOR2& otherPos, float otherRadius);
-    // void resolveCollision(CollisionInfo * collisionInfo);
+
+    // 碰撞检测
+    bool checkCollision(const D3DXVECTOR2& pos1, float radius1,
+                       const D3DXVECTOR2& pos2, float radius2);
+
+    // 添加/移除物理对象
+    void addPhysicsObject(class GameObject* obj);
+    void removePhysicsObject(class GameObject* obj);
+
+    // 应用物理效果
     void applyPhysics(float deltaTime);
-
-    D3DXVECTOR2 getPosition();
-    void setPosition();
-
-    D3DXVECTOR2 getVelocity;
-    void setVelocity();
-
-    float getSpeed();
-    void setSpeed();
-
-    bool isCollisionEnabled() const { return collision; }
-    void setCollisionEnabled(bool enable) { collision = enable; }
-
-
-
-
 };
-
-
-#endif //GAME_PHYSICSMANAGER_H

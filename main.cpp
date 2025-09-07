@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <dinput.h>
+
+#include "src/Game/Header/Mainmenu.h"
 #include "src/Timer/Header/Timer.h"
 #include "src/Manager/Header/InputManager.h"
 #include "src/Manager/Header/SoundManager.h"

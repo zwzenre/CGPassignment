@@ -3,8 +3,15 @@
 
 class Timer {
 public:
-    void Init(int);
+    Timer();
+    ~Timer();
+
+    void initialization();
+    void Init(int fps);
     int FramesToUpdate();
+    void tick();
+    float getDeltaTimer();
+    void reset();
 
 private:
     LARGE_INTEGER timerFreq;
@@ -13,4 +20,5 @@ private:
     int requestedFPS;
     float intervalsPerFrame;
     float intervalsSinceLastUpdate;
+    float deltaTime;
 };

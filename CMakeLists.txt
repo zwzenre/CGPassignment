@@ -26,7 +26,9 @@ add_executable(Game main.cpp
         src/Game/Obstacle.cpp
         src/Game/Header/Obstacle.h
         src/Game/RaceCar.cpp
-        src/Game/Header/RaceCar.h)
+        src/Game/Header/RaceCar.h
+        src/Game/Mainmenu.cpp
+        src/Game/Header/Mainmenu.h)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
