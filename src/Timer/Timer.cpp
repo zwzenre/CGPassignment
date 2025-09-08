@@ -1,27 +1,33 @@
-#include "Header/Timer.h"
+#include "../Timer/Header/Timer.h"
 #include <profileapi.h>
 
-void Timer::Init(int fps) {
-    QueryPerformanceFrequency(&timerFreq);
+void Timer::Init(int fps)
+{
+    QueryPerformanceFrequency(&timeFreq);
     QueryPerformanceCounter(&timeNow);
     QueryPerformanceCounter(&timePrevious);
 
     requestedFPS = fps;
 
-    intervalsPerFrame = (float)(timerFreq.QuadPart / requestedFPS);
+    intervalsPerFrame = (float)(timeFreq.QuadPart / requestedFPS);
+
 }
 
-int Timer::FramesToUpdate() {
+int Timer::FramesToUpdate()
+{
     int framesToUpdate = 0;
     QueryPerformanceCounter(&timeNow);
 
-    // Get delta time
-    intervalsSinceLastUpdate = (float)timeNow.QuadPart - (float)timePrevious.QuadPart;
+    //get the delta time
+    intervalsSinceLastUpdate = (float)(timeNow.QuadPart - (float)timePrevious.QuadPart);
 
     framesToUpdate = (int)(intervalsSinceLastUpdate / intervalsPerFrame);
 
-    if (framesToUpdate != 0)
+    if(framesToUpdate != 0)
+    {
         QueryPerformanceCounter(&timePrevious);
+    }
+
 
     return framesToUpdate;
 }

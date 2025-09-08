@@ -9,6 +9,7 @@
 #include "src/Timer/Header/Timer.h"
 #include "src/Manager/Header/InputManager.h"
 #include "src/Manager/Header/SoundManager.h"
+#include "src/Game/Header/Mainmenu.h"
 
 using namespace std;
 #pragma comment(lib, "d3d9.lib")
@@ -67,6 +68,8 @@ IDirect3DDevice9 *d3dDevice;
 LPDIRECTINPUT8 dInput;
 LPDIRECTINPUTDEVICE8 dInputKeyboardDevice;
 LPDIRECTINPUTDEVICE8 dInputMouseDevice;
+
+LPDIRECT3DTEXTURE9 menuBackground = NULL;
 
 Timer frameTimer = Timer();
 SoundManager * soundManager = new SoundManager();
@@ -347,6 +350,7 @@ void Render() {
     player1Rect.bottom = player1Rect.top + player1SpriteHeight;
 
     spriteBrush->SetTransform(&player1Matrix);
+    spriteBrush->Draw(menuBackground, NULL, NULL, NULL, D3DCOLOR_XRGB(255,255,255));
     spriteBrush->Draw(playerTexture, &player1Rect, NULL, NULL, D3DCOLOR_XRGB(255, 255, 255));
 
     spriteBrush->End();
@@ -355,15 +359,28 @@ void Render() {
 }
 
 int main() {
+    CreateGameWindow();
+    if (!CreateDirectX()) return 0;
+    InitializeGame();
+    CreateFontInterface();
+    MainMenu menu;
+    menu.Initialization();
+
     if (!Initialization())
         return 0;
 
     cout << "Entering game loop..." << endl;
 
     while (WindowIsRunning()) {
+        d3dDevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
+        d3dDevice->BeginScene();
+
         Input();
         Update(frameTimer.FramesToUpdate());
         Render();
+
+        d3dDevice->EndScene();
+        d3dDevice->Present(NULL, NULL, NULL, NULL);
     }
 
     CleanAll();

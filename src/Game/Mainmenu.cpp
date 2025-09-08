@@ -1,78 +1,68 @@
 #include "Header/Mainmenu.h"
-#include "MainMenu.h"
 #include <windows.h>
+#include <d3d9.h>
+#include <d3dx9.h>
 
-// 默认构造函数
-MainMenu::MainMenu()
-    : selectedIndex(0),
-      currentState(MENU_ACTIVE),
-      keyPressed(false),
-      lastKeyTime(0),
-      menuPosition(300.0f, 200.0f),
-      selectedColor(D3DCOLOR_XRGB(255, 255, 0)), // 黄色
-      normalColor(D3DCOLOR_XRGB(255, 255, 255)),  // 白色
-      itemSpacing(40.0f)
+
+extern LPD3DXSPRITE spriteBrush;
+extern LPDIRECT3DDEVICE9 d3dDevice;
+extern LPDIRECT3DTEXTURE9 menuBackground;
+
+
+
+void MainMenu::Initialization()
 {
-    // 初始化默认菜单项
-    items.push_back("Start Game");
-    items.push_back("Options");
-    items.push_back("Exit");
+    HRESULT hr = D3DXCreateTextureFromFileEx(
+        d3dDevice,
+        "assets/Mainmenu.png",
+        D3DX_DEFAULT, D3DX_DEFAULT,
+        D3DX_DEFAULT, NULL,
+        D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
+        D3DX_DEFAULT, D3DX_DEFAULT, 0,
+        NULL, NULL,
+        &menuBackground
+    );
+
+    if (FAILED(hr)) {
+        MessageBox(NULL, "Failed to load Mainmenu.png!", "ERROR", MB_OK | MB_ICONSTOP);
+    }
 }
 
-// 带参数的构造函数
-MainMenu::MainMenu(D3DXVECTOR2 position, float spacing)
-    : selectedIndex(0),
-      currentState(MENU_ACTIVE),
-      keyPressed(false),
-      lastKeyTime(0),
-      menuPosition(position),
-      selectedColor(D3DCOLOR_XRGB(255, 255, 0)),
-      normalColor(D3DCOLOR_XRGB(255, 255, 255)),
-      itemSpacing(spacing)
-{
-    items.push_back("Start Game");
-    items.push_back("Options");
-    items.push_back("Exit");
-}
+// void CreateFontInterface()
+// {
+//     HRESULT hr = D3DXCreateFont(d3dDevice, 20, 0, 0, 1, false,
+//         DEFAULT_CHARSET, OUT_TT_ONLY_PRECIS, DEFAULT_QUALITY,
+//         DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
+//
+//     textRect.left = 10;
+//     textRect.top = 10;
+//     textRect.right = 400;
+//     textRect.bottom = 200;
+// }
 
-// 析构函数
-MainMenu::~MainMenu()
-{
-    items.clear();
-}
-
-// 更新菜单逻辑
 void MainMenu::update()
 {
-    if (currentState != MENU_ACTIVE) return;
 
-    handleInput();
 }
 
-// 处理输入的私有方法
 void MainMenu::handleInput()
 {
-    // 向上移动
     if (isKeyPressedWithDelay(VK_UP))
     {
         moveUp();
     }
 
-    // 向下移动
     if (isKeyPressedWithDelay(VK_DOWN))
     {
         moveDown();
     }
 
-    // Enter键确认选择（可以在Game类中处理）
     if (isKeyPressedWithDelay(VK_RETURN))
     {
-        // 可以添加选择确认的逻辑
-        // 或者让Game类来处理这个
+
     }
 }
 
-// 检查按键是否按下且有延迟
 bool MainMenu::isKeyPressedWithDelay(int virtualKey)
 {
     DWORD currentTime = GetTickCount();
@@ -94,43 +84,25 @@ bool MainMenu::isKeyPressedWithDelay(int virtualKey)
     return false;
 }
 
-// 重置按键状态
 void MainMenu::resetKeyState()
 {
     keyPressed = false;
     lastKeyTime = 0;
 }
 
-// 渲染菜单
-void MainMenu::render(LPD3DXSPRITE spriteHandler, LPD3DXFONT font)
+void MainMenu::render()
 {
-    if (currentState == MENU_INACTIVE) return;
+    if (spriteBrush && menuBackground) {
+        spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
 
-    RECT rect;
-    float currentY = menuPosition.y;
+        D3DXVECTOR3 position(0.0f, 0.0f, 0.0f);
+        spriteBrush->Draw(menuBackground, NULL, NULL, &position,
+                          D3DCOLOR_XRGB(255, 255, 255));
 
-    for (size_t i = 0; i < items.size(); i++)
-    {
-        SetRect(&rect,
-                static_cast<int>(menuPosition.x),
-                static_cast<int>(currentY),
-                static_cast<int>(menuPosition.x + 400),
-                static_cast<int>(currentY + itemSpacing));
-
-        D3DCOLOR color = (i == selectedIndex) ? selectedColor : normalColor;
-
-        font->DrawTextA(spriteHandler,
-                       items[i].c_str(),
-                       -1,
-                       &rect,
-                       DT_LEFT | DT_TOP,
-                       color);
-
-        currentY += itemSpacing;
+        spriteBrush->End();
     }
 }
 
-// 移动选择向上
 void MainMenu::moveUp()
 {
     selectedIndex--;
@@ -140,7 +112,6 @@ void MainMenu::moveUp()
     }
 }
 
-// 移动选择向下
 void MainMenu::moveDown()
 {
     selectedIndex++;
@@ -150,7 +121,6 @@ void MainMenu::moveDown()
     }
 }
 
-// Getter方法
 int MainMenu::getSelectedIndex() const
 {
     return selectedIndex;
@@ -170,7 +140,6 @@ std::string MainMenu::getSelectedText() const
     return "";
 }
 
-// 设置选中项
 void MainMenu::setSelected(int index)
 {
     if (index >= 0 && index < static_cast<int>(items.size()))
@@ -179,7 +148,6 @@ void MainMenu::setSelected(int index)
     }
 }
 
-// 状态管理
 MenuState MainMenu::getState() const
 {
     return currentState;
@@ -195,7 +163,6 @@ bool MainMenu::isActive() const
     return currentState == MENU_ACTIVE;
 }
 
-// 菜单项管理
 void MainMenu::addMenuItem(const std::string& item)
 {
     items.push_back(item);
@@ -207,7 +174,6 @@ void MainMenu::removeMenuItem(int index)
     {
         items.erase(items.begin() + index);
 
-        // 调整选中索引
         if (selectedIndex >= static_cast<int>(items.size()))
         {
             selectedIndex = static_cast<int>(items.size()) - 1;
@@ -225,7 +191,6 @@ void MainMenu::clearMenu()
     selectedIndex = 0;
 }
 
-// 外观设置
 void MainMenu::setColors(D3DCOLOR selected, D3DCOLOR normal)
 {
     selectedColor = selected;
@@ -242,7 +207,6 @@ void MainMenu::setSpacing(float spacing)
     itemSpacing = spacing;
 }
 
-// 工具方法
 int MainMenu::getItemCount() const
 {
     return static_cast<int>(items.size());
