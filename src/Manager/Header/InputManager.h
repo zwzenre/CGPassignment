@@ -4,11 +4,7 @@
 class InputManager {
 public:
     InputManager();
-    ~InputManager();
-
-    void initialization();
-    void updateInput();
-    bool isKeyPress(int key);
+    //~InputManager();
     void GetDevice();
 
 private:
@@ -18,6 +14,7 @@ private:
     LPDIRECTINPUT8 dInput;
     LPDIRECTINPUTDEVICE8 dInputKeyboardDevice;
     LPDIRECTINPUTDEVICE8 dInputMouseDevice;
-    HWND hWnd;
+
+    HRESULT hr;
 };
 
