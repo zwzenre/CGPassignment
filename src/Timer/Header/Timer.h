@@ -5,6 +5,7 @@ class Timer {
 public:
     void Init(int);
     int FramesToUpdate();
+    float GetDeltaTime();
 
 private:
     LARGE_INTEGER timerFreq;

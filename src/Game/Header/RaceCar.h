@@ -1,44 +1,68 @@
 #pragma once
-#include <string>
 #include <d3dx9math.h>
-
-#ifndef GAME_RACECAR_H
-#define GAME_RACECAR_H
-
+#include <d3dx9.h>
 
 class RaceCar {
 private:
-    D3DXVECTOR2  position;
+    D3DXVECTOR2 position;
+    D3DXVECTOR2 velocity;
+    float rotation;
+
+    // Realistic physics parameters
+    float enginePower;
     float maxSpeed;
     float currentSpeed;
-    float direction;
-    D3DXVECTOR2 velocity;
-    float acceleration;
+    float accelerationRate;
+    float decelerationRate;
     float brakePower;
-    float friction;
-    std::string sprite;
+    float dragCoefficient;
+    float rollingResistance;
+
+    // Steering parameters
+    float steeringAngle;
+    float maxSteeringAngle;
+    float steeringSpeed;
+    float wheelBase; // Distance between front and rear wheels
+
+    // Tire parameters
+    float tireGrip;
+    float weightTransfer;
+
+    // Animation
+    int currentFrame;
+    int maxFrame;
+    int frameWidth;
+    int frameHeight;
+    float frameTimer;
+    float frameDelay;
 
 public:
     RaceCar(D3DXVECTOR2 startPos);
 
-    void render();
-    void update();
-    void setSpeed();
-    void getSpeed();
-    void accelerate();
-    void brake();
-    void turn();
+    void Update(float deltaTime, bool moveForward, bool moveBackward, bool turnLeft, bool turnRight);
+    void Render(LPD3DXSPRITE spriteBrush, LPDIRECT3DTEXTURE9 texture);
 
-    D3DXVECTOR2 getPlayerPosition();
+    D3DXVECTOR2 GetVelocity() const { return velocity; }
+    float GetRotation() const { return rotation; }
+    D3DXVECTOR2 GetPosition() const { return position; }
+    float GetWidth() const { return static_cast<float>(frameWidth); }
+    float GetHeight() const { return static_cast<float>(frameHeight); }
 
+    void SetPosition(const D3DXVECTOR2& pos) { position = pos; }
+    void SetVelocity(const D3DXVECTOR2& vel) { velocity = vel; }
+    void SetRotation(float rot) { rotation = rot; }
+
+    RECT GetBoundingBox() const {
+        RECT r;
+        r.left   = static_cast<LONG>(position.x);
+        r.top    = static_cast<LONG>(position.y);
+        r.right  = static_cast<LONG>(position.x + frameWidth);
+        r.bottom = static_cast<LONG>(position.y + frameHeight);
+        return r;
+    }
+
+private:
+    void ApplyPhysics(float deltaTime, bool accelerate, bool brake, bool turnLeft, bool turnRight);
+    void UpdateSteering(float deltaTime, bool turnLeft, bool turnRight);
+    void UpdateAnimation(float deltaTime, bool turnLeft, bool turnRight);
 };
-
-
-
-
-
-
-
-
-
-#endif //GAME_RACECAR_H
