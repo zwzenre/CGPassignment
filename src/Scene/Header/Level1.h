@@ -3,6 +3,7 @@
 #include "../../Manager/Header/SoundManager.h"
 #include "../../Scene/Header/Scene.h"
 #include "../../Game/Header/RaceCar.h"
+//#include "../../Timer/Header/Timer.h"
 #include <d3dx9.h>
 
 class Level1 : public Scene {
@@ -25,4 +26,6 @@ private:
 
     void CreateFont();
     void CleanupFont();
+
+//    Timer gameTimer;
 };
