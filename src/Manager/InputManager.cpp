@@ -84,6 +84,28 @@ void InputManager::Quit() {
     }
 }
 
+POINT InputManager::GetMousePosition() {
+    POINT mousePos = {0, 0};
+    if (dInputMouseDevice) {
+        DIMOUSESTATE mouseState;
+        if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
+            GetCursorPos(&mousePos);
+            ScreenToClient(hWnd, &mousePos);
+        }
+    }
+    return mousePos;
+}
+
+bool InputManager::IsMouseButtonPressed(int button) {
+    if (dInputMouseDevice && button >= 0 && button < 8) {
+        DIMOUSESTATE mouseState;
+        if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
+            return (mouseState.rgbButtons[button] & 0x80) != 0;
+        }
+    }
+    return false;
+}
+
 bool InputManager::IsKeyDown(int dik) const {
     return (diKeys[dik] & 0x80) != 0;
 }

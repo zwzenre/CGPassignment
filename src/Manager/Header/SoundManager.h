@@ -3,6 +3,9 @@
 
 class SoundManager {
 public:
+    // SoundManager();
+    // ~SoundManager();
+
     FMOD::System * system; // Virtual Sound Card
     FMOD::Sound * sound1, * sound2; // Store Sound File
     FMOD::Channel * channel = 0; // Buffer
@@ -14,4 +17,5 @@ public:
     void PlaySoundTrack();
     void LoadSounds();
     void UpdateSound();
+    void cleanup();
 };
