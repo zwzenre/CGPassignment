@@ -79,6 +79,15 @@ void Game::Render() {
     // Draw the player using the sprite sheet and the player's current frame
     player.Render(spriteBrush, carTexture);
 
+    RECT textRect;
+    textRect.left = 600;
+    textRect.top = 50;
+    textRect.right = 800;
+    textRect.bottom = 100;
+
+    fontBrush->DrawText(spriteBrush, timer.GetTimer().c_str(), -1, &textRect, DT_SINGLELINE, D3DCOLOR_XRGB(0, 0, 0));
+
+
     if (spriteBrush) spriteBrush->End();
     d3dDevice->EndScene();
     d3dDevice->Present(NULL, NULL, NULL, NULL);

@@ -1,4 +1,5 @@
 #include "Header/Level1.h"
+#include <string>
 #include <windows.h>
 #include <d3dx9.h>
 
@@ -49,6 +50,14 @@ void Level1::Render(LPD3DXSPRITE sprite) {
 
     sprite->Begin(D3DXSPRITE_ALPHABLEND);
     playerCar->Render(sprite, carTexture);
+
+    RECT textRect;
+    textRect.left = 600;
+    textRect.top = 50;
+    textRect.right = 800;
+    textRect.bottom = 100;
+
+    fontBrush->DrawText(sprite, gameTimer.GetTimer().c_str(), -1, &textRect, DT_SINGLELINE, D3DCOLOR_XRGB(0, 0, 0));
     sprite->End();
 }
 
