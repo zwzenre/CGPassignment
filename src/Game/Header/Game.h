@@ -35,6 +35,8 @@ private:
 
     static constexpr int TARGET_FPS = 120;
 
+    int time = 0;
+
 public:
     Game();
     ~Game();

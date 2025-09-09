@@ -60,6 +60,7 @@ void Game::Update() {
         // If you plan to centralize physics, call physicsManager here.
         // For now RaceCar.Update handles movement + animation:
         player.Update(deltaTime, forward, left, right, backward);
+        timer.SetTotalTime(time++);
 
         // If you later want PhysicsManager to update the car:
         // physicsManager.updateRaceCar(player, forward, backward, left, right, screenW, screenH);
