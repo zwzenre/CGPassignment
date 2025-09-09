@@ -13,7 +13,7 @@ public:
     // Scene interface implementation
     void Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager* soundMgr) override;
     void Update(float deltaTime) override;
-    void Render(LPD3DXSPRITE spriteBrush) override;  // 注意：spriteBrush由SceneManager传入
+    void Render(LPD3DXSPRITE spriteBrush) override;
     void Quit() override;
 
     bool IsPlayButtonClicked() const { return playButtonClicked; }
