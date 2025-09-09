@@ -84,8 +84,12 @@ void MainMenuScene::Render(LPD3DXSPRITE spriteBrush) {
         float scaleX = (float)windowWidth / bgDesc.Width;
         float scaleY = (float)windowHeight / bgDesc.Height;
 
-        D3DXVECTOR2 bgScale(scaleX, scaleY);
-        D3DXVECTOR2 bgPosition(0.0f, 0.0f);
+        float scale = max(scaleX, scaleY);
+        D3DXVECTOR2 bgScale(scale, scale);
+
+        float offsetX = (windowWidth - bgDesc.Width * scale) / 2.0f;
+        float offsetY = (windowHeight - bgDesc.Height * scale) / 2.0f;
+        D3DXVECTOR2 bgPosition(offsetX, offsetY);
 
         D3DXMATRIX matBg;
         D3DXMatrixTransformation2D(&matBg, NULL, 0.0f, &bgScale, NULL, 0.0f, &bgPosition);
@@ -119,10 +123,10 @@ void MainMenuScene::DrawTitle(LPD3DXSPRITE spriteBrush) {
     if (!titleFont) return;
 
     RECT titleRect;
-    SetRect(&titleRect, 0, 10, windowWidth, 150);
+    SetRect(&titleRect, -80, 10, windowWidth, 150);
 
     const char* fullText = "Initial";
-    const char* lastChar = " D";
+    const char* lastChar = " C++";
 
     RECT shadowRect;
     for (int dx = -3; dx <= 3; dx++) {
@@ -140,14 +144,38 @@ void MainMenuScene::DrawTitle(LPD3DXSPRITE spriteBrush) {
                          DT_CENTER | DT_VCENTER,
                          D3DCOLOR_XRGB(255, 255, 255));
 
-    RECT dRect = { windowWidth/2 + 50, 10, windowWidth, 150 };
+    RECT dRect = { windowWidth/2 + 90, 10, windowWidth, 150 };
+    for (int dx = -3; dx <= 3; dx++) {
+        for (int dy = -3; dy <= 3; dy++) {
+            if (dx == 0 && dy == 0) continue;
+            RECT dShadow = dRect;
+            OffsetRect(&dShadow, dx, dy);
+            titleFont->DrawTextA(spriteBrush, lastChar, -1, &dShadow,
+                                 DT_LEFT | DT_VCENTER,
+                                 D3DCOLOR_XRGB(0, 0, 0));
+        }
+    }
     titleFont->DrawTextA(spriteBrush, lastChar, -1, &dRect,
                          DT_LEFT | DT_VCENTER,
                          D3DCOLOR_XRGB(255, 0, 0));
 }
 
+
 void MainMenuScene::DrawButton(LPD3DXSPRITE spriteBrush) {
-    LPDIRECT3DTEXTURE9 texToDraw = playButtonHovered ? playButtonHoverTex : playButtonTex;
+    LPDIRECT3DTEXTURE9 texToDraw;
+    D3DCOLOR buttonColor = D3DCOLOR_XRGB(255, 255, 255);
+
+    if (playButtonPressed) {
+        texToDraw = playButtonTex;
+        buttonColor = D3DCOLOR_XRGB(255, 255, 255);
+    } else if (playButtonHovered) {
+        texToDraw = playButtonHoverTex;
+        buttonColor = D3DCOLOR_XRGB(200, 200, 200);
+    } else {
+        texToDraw = playButtonHoverTex;
+        buttonColor = D3DCOLOR_XRGB(255, 255, 255);
+    }
+
     if (!texToDraw) return;
 
     D3DSURFACE_DESC desc;
@@ -164,16 +192,38 @@ void MainMenuScene::DrawButton(LPD3DXSPRITE spriteBrush) {
     spriteBrush->SetTransform(&mat);
 
     D3DXVECTOR3 pos(0, 0, 0);
-    spriteBrush->Draw(texToDraw, NULL, NULL, &pos, D3DCOLOR_XRGB(255, 255, 255));
+    spriteBrush->Draw(texToDraw, NULL, NULL, &pos, buttonColor);
 
     D3DXMATRIX identity;
     D3DXMatrixIdentity(&identity);
     spriteBrush->SetTransform(&identity);
 
     if (fontBrush) {
+        D3DCOLOR textColor;
+        if (playButtonPressed) {
+            textColor = D3DCOLOR_XRGB(150, 150, 150);
+        } else if (playButtonHovered) {
+            textColor = D3DCOLOR_XRGB(220, 220, 220);
+        } else {
+            textColor = D3DCOLOR_XRGB(255, 255, 255);
+        }
+
+        RECT textShadow = playButtonRect;
+        OffsetRect(&textShadow, 2, 2);
+        fontBrush->DrawTextA(spriteBrush, "Play", -1, &textShadow,
+                             DT_CENTER | DT_VCENTER,
+                             D3DCOLOR_XRGB(0, 0, 0));
+
         fontBrush->DrawTextA(spriteBrush, "Play", -1, &playButtonRect,
                              DT_CENTER | DT_VCENTER,
-                             D3DCOLOR_XRGB(255, 255, 255));
+                             textColor);
+    }
+}
+
+void MainMenuScene::CleanupDrawButton() {
+    if (fontBrush) {
+        fontBrush->Release();
+        fontBrush = nullptr;
     }
 }
 

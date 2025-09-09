@@ -43,6 +43,9 @@ private:
     void CreateTitleFont();
     void DrawTitle(LPD3DXSPRITE spriteBrush);
     void DrawButton(LPD3DXSPRITE spriteBrush);
+
+    void CleanupDrawButton();
+
     void CleanupTextures();
     void CleanupFonts();
 };
