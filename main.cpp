@@ -13,8 +13,6 @@ int main() {
     //sceneManager.ChangeScene(new Level1());
     sceneManager.ChangeScene(new MainMenuScene());
 
-
-
     // Main game loop
     while (sceneManager.WindowIsRunning()) {
         sceneManager.Update();

@@ -7,17 +7,17 @@
 
 RaceCar::RaceCar(D3DXVECTOR2 startPos)
     : position(startPos), velocity(0, 0), rotation(0.0f),
-      enginePower(100.0f),
-      maxSpeed(200.0f),
+      enginePower(300.0f),
+      maxSpeed(400.0f),
       currentSpeed(0.0f),
-      accelerationRate(4.0f),
-      decelerationRate(1.0f),
-      brakePower(3.0f),
-      dragCoefficient(0.08f),
-      rollingResistance(0.03f),
+      accelerationRate(8.0f),
+      decelerationRate(2.0f),
+      brakePower(6.0f),
+      dragCoefficient(0.05f),
+      rollingResistance(0.02f),
       steeringAngle(0.0f),
-      maxSteeringAngle(0.4f),
-      steeringSpeed(2.5f),
+      maxSteeringAngle(0.1f),
+      steeringSpeed(0.1f),
       wheelBase(1.5f),
       tireGrip(0.8f),
       weightTransfer(0.1f),
@@ -35,23 +35,23 @@ void RaceCar::Update(float deltaTime, bool moveForward, bool moveBackward, bool 
 }
 
 void RaceCar::ApplyPhysics(float deltaTime, bool moveForward, bool moveBackward, bool turnLeft, bool turnRight) {
-    // ENGINE FORCE
+    // ENGINE FORCE - MORE POWERFUL
     float engineForce = 0.0f;
     if (moveForward) {
-        engineForce = enginePower;
+        engineForce = enginePower * accelerationRate; // Added acceleration rate multiplier
     }
 
-    // BRAKING/REVERSE FORCE
+    // BRAKING/REVERSE FORCE - STRONGER
     float brakeForce = 0.0f;
     if (moveBackward) {
         if (currentSpeed > 0) {
-            brakeForce = brakePower; // Brake if moving forward
+            brakeForce = brakePower * 2.0f; // Stronger braking
         } else {
-            engineForce = -enginePower * 0.6f; // Reverse (slower than forward)
+            engineForce = -enginePower * 0.8f; // Faster reverse
         }
     }
 
-    // DRAG FORCE (air resistance) - reduced for higher speeds
+    // DRAG FORCE - reduced further
     float dragForce = dragCoefficient * fabsf(currentSpeed) * currentSpeed;
 
     // ROLLING RESISTANCE - reduced
@@ -60,22 +60,22 @@ void RaceCar::ApplyPhysics(float deltaTime, bool moveForward, bool moveBackward,
     // NET FORCE
     float netForce = engineForce - brakeForce - dragForce - rollingForce;
 
-    // ACCELERATION
+    // ACCELERATION - FASTER RESPONSE
     float acceleration = netForce;
-    currentSpeed += acceleration * deltaTime;
+    currentSpeed += acceleration * deltaTime * 2.0f; // Doubled acceleration effect
 
     // Clamp speed - faster maximums
     if (moveBackward && currentSpeed < 0) {
-        currentSpeed = (std::max)(-maxSpeed * 0.7f, currentSpeed); // Faster reverse
+        currentSpeed = (std::max)(-maxSpeed * 0.8f, currentSpeed); // Faster reverse
     } else {
-        currentSpeed = (std::min)(maxSpeed, (std::max)(-maxSpeed * 0.7f, currentSpeed));
+        currentSpeed = (std::min)(maxSpeed, (std::max)(-maxSpeed * 0.8f, currentSpeed));
     }
 
-    // STEERING EFFECTS - responsive even at higher speeds
-    if (fabsf(currentSpeed) > 0.5f && fabsf(steeringAngle) > 0.01f) {
-        // Speed-dependent steering (less sensitive at high speeds)
-        float speedFactor = 1.0f - (fabsf(currentSpeed) / maxSpeed) * 0.5f;
-        float turnRate = steeringAngle * currentSpeed * 0.4f * speedFactor;
+    // STEERING EFFECTS - SLOWER, MORE CONTROLLED
+    if (fabsf(currentSpeed) > 1.0f && fabsf(steeringAngle) > 0.01f) {
+        // Speed-dependent steering (more controlled at all speeds)
+        float speedFactor = 0.5f + (0.5f * (1.0f - (fabsf(currentSpeed) / maxSpeed) * 0.3f));
+        float turnRate = steeringAngle * currentSpeed * 0.2f * speedFactor; // Reduced turn rate
         rotation += turnRate * deltaTime;
     }
 
@@ -88,16 +88,15 @@ void RaceCar::ApplyPhysics(float deltaTime, bool moveForward, bool moveBackward,
 }
 
 void RaceCar::UpdateSteering(float deltaTime, bool turnLeft, bool turnRight) {
-    // Update steering angle
     float steeringInput = 0.0f;
     if (turnLeft) steeringInput -= 1.0f;
     if (turnRight) steeringInput += 1.0f;
 
-    steeringAngle += steeringInput * steeringSpeed * deltaTime;
+    float speedFactor = 0.7f + (0.3f * (1.0f - fabsf(currentSpeed) / maxSpeed));
+    steeringAngle += steeringInput * steeringSpeed * speedFactor * deltaTime;
 
-    // Return to center when no input
     if (steeringInput == 0.0f) {
-        float returnSpeed = steeringSpeed * 1.5f; // Faster return to center
+        float returnSpeed = steeringSpeed * 2.5f;
         if (steeringAngle > 0) {
             steeringAngle -= returnSpeed * deltaTime;
             steeringAngle = (std::max)(0.0f, steeringAngle);
@@ -106,29 +105,46 @@ void RaceCar::UpdateSteering(float deltaTime, bool turnLeft, bool turnRight) {
             steeringAngle = (std::min)(0.0f, steeringAngle);
         }
     }
-
-    // Clamp steering angle
     steeringAngle = (std::max)(-maxSteeringAngle, (std::min)(steeringAngle, maxSteeringAngle));
 }
 
 void RaceCar::UpdateAnimation(float deltaTime, bool turnLeft, bool turnRight) {
-    // Faster animation that works at higher speeds
-    float animSpeedThreshold = 3.0f; // Lower threshold for faster response
+    float animSpeedThreshold = 5.0f;
 
-    if (turnLeft && fabsf(currentSpeed) > animSpeedThreshold) {
+    if (fabsf(currentSpeed) > animSpeedThreshold) {
         frameTimer += deltaTime;
-        if (frameTimer >= frameDelay) {
-            frameTimer = 0.0f;
-            currentFrame = (currentFrame + 1) % 3 + 1;
+
+        if (turnLeft && !turnRight) {
+            if (frameTimer >= frameDelay) {
+                frameTimer = 0.0f;
+                if (currentFrame >= 4 && currentFrame <= 6) {
+                    currentFrame = 1;
+                } else {
+                    currentFrame = (currentFrame < 1 || currentFrame > 3) ? 1 : ((currentFrame - 1 + 1) % 3) + 1;
+                }
+            }
         }
-    } else if (turnRight && fabsf(currentSpeed) > animSpeedThreshold) {
-        frameTimer += deltaTime;
-        if (frameTimer >= frameDelay) {
-            frameTimer = 0.0f;
-            currentFrame = (currentFrame + 1) % 3 + 4;
+        else if (turnRight && !turnLeft) {
+            if (frameTimer >= frameDelay) {
+                frameTimer = 0.0f;
+                if (currentFrame >= 1 && currentFrame <= 3) {
+                    currentFrame = 4;
+                } else {
+                    currentFrame = (currentFrame < 4 || currentFrame > 6) ? 4 : ((currentFrame - 4 + 1) % 3) + 4;
+                }
+            }
         }
-    } else {
-        // Smooth transition back to center frame
+        else {
+            if (currentFrame != 0) {
+                frameTimer += deltaTime * 1.5f;
+                if (frameTimer >= frameDelay * 1.5f) {
+                    frameTimer = 0.0f;
+                    currentFrame = 0;
+                }
+            }
+        }
+    }
+    else {
         if (currentFrame != 0) {
             frameTimer += deltaTime;
             if (frameTimer >= frameDelay * 2.0f) {
