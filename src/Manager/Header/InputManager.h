@@ -17,9 +17,15 @@ public:
     LONG GetMouseY() const;
     LONG GetMouseZ() const;
 
+    POINT GetMousePosition();
+
+    bool IsMouseButtonPressed(int i);
+
 private:
     BYTE diKeys[256];
     DIMOUSESTATE mouseState;
+
+    HWND hWnd;
 
     LPDIRECTINPUT8 dInput;
     LPDIRECTINPUTDEVICE8 dInputKeyboardDevice;

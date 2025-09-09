@@ -31,10 +31,10 @@ add_executable(Game main.cpp
         src/Scene/Header/MainMenuScene.h
         src/Scene/SelectStageScene.cpp
         src/Scene/Header/SelectStageScene.h
-        src/Scene/Header/Scene.h)
-        src/Game/Header/RaceCar.h
+        src/Scene/Header/Scene.h
         src/Game/Mainmenu.cpp
-        src/Game/Header/Mainmenu.h)
+        src/Game/Header/Mainmenu.h
+        src/Scene/MainMenuScene.cpp)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
@@ -69,6 +69,12 @@ target_link_libraries(Game
 set(GAME_ASSETS
         # add asset files here
         assets/practical9.png
+        assets/Mainmenu.png
+        assets/Mainmenu2.png
+        assets/button_round_depth_line.png
+        assets/button_square_line.png
+        assets/button_round_line.png
+        assets/car.png
 )
 
 add_custom_command(

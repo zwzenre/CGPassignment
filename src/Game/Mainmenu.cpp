@@ -1,218 +1,222 @@
-#include "Header/Mainmenu.h"
-#include <windows.h>
-#include <d3d9.h>
-#include <d3dx9.h>
-
-
-extern LPD3DXSPRITE spriteBrush;
-extern LPDIRECT3DDEVICE9 d3dDevice;
-extern LPDIRECT3DTEXTURE9 menuBackground;
-
-
-
-void MainMenu::Initialization()
-{
-    HRESULT hr = D3DXCreateTextureFromFileEx(
-        d3dDevice,
-        "assets/Mainmenu.png",
-        D3DX_DEFAULT, D3DX_DEFAULT,
-        D3DX_DEFAULT, NULL,
-        D3DFMT_A8R8G8B8, D3DPOOL_MANAGED,
-        D3DX_DEFAULT, D3DX_DEFAULT, 0,
-        NULL, NULL,
-        &menuBackground
-    );
-
-    if (FAILED(hr)) {
-        MessageBox(NULL, "Failed to load Mainmenu.png!", "ERROR", MB_OK | MB_ICONSTOP);
-    }
-}
-
-// void CreateFontInterface()
-// {
-//     HRESULT hr = D3DXCreateFont(d3dDevice, 20, 0, 0, 1, false,
-//         DEFAULT_CHARSET, OUT_TT_ONLY_PRECIS, DEFAULT_QUALITY,
-//         DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
+// #include "../Game/Header/Mainmenu.h"
+// #include <iostream>
 //
-//     textRect.left = 10;
-//     textRect.top = 10;
-//     textRect.right = 400;
-//     textRect.bottom = 200;
+// MainMenu::MainMenu() {
+//     d3dDevice = nullptr;
+//     menuBackground = nullptr;
+//     titleFont = nullptr;
+//     fontBrush = nullptr;
+//     playButtonTex = nullptr;
+//     playButtonHoverTex = nullptr;
+//     playButtonHovered = false;
+//     playButtonPressed = false;
+//     playButtonClicked = false;
+//
+//     dInput = nullptr;
+//     dInputKeyboardDevice = nullptr;
+//     dInputMouseDevice = nullptr;
 // }
-
-void MainMenu::update()
-{
-
-}
-
-void MainMenu::handleInput()
-{
-    if (isKeyPressedWithDelay(VK_UP))
-    {
-        moveUp();
-    }
-
-    if (isKeyPressedWithDelay(VK_DOWN))
-    {
-        moveDown();
-    }
-
-    if (isKeyPressedWithDelay(VK_RETURN))
-    {
-
-    }
-}
-
-bool MainMenu::isKeyPressedWithDelay(int virtualKey)
-{
-    DWORD currentTime = GetTickCount();
-
-    if (GetAsyncKeyState(virtualKey) & 0x8000)
-    {
-        if (!keyPressed || (currentTime - lastKeyTime) > KEY_DELAY)
-        {
-            keyPressed = true;
-            lastKeyTime = currentTime;
-            return true;
-        }
-    }
-    else
-    {
-        keyPressed = false;
-    }
-
-    return false;
-}
-
-void MainMenu::resetKeyState()
-{
-    keyPressed = false;
-    lastKeyTime = 0;
-}
-
-void MainMenu::render()
-{
-    if (spriteBrush && menuBackground) {
-        spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
-
-        D3DXVECTOR3 position(0.0f, 0.0f, 0.0f);
-        spriteBrush->Draw(menuBackground, NULL, NULL, &position,
-                          D3DCOLOR_XRGB(255, 255, 255));
-
-        spriteBrush->End();
-    }
-}
-
-void MainMenu::moveUp()
-{
-    selectedIndex--;
-    if (selectedIndex < 0)
-    {
-        selectedIndex = static_cast<int>(items.size()) - 1;
-    }
-}
-
-void MainMenu::moveDown()
-{
-    selectedIndex++;
-    if (selectedIndex >= static_cast<int>(items.size()))
-    {
-        selectedIndex = 0;
-    }
-}
-
-int MainMenu::getSelectedIndex() const
-{
-    return selectedIndex;
-}
-
-MenuOption MainMenu::getSelectedOption() const
-{
-    return static_cast<MenuOption>(selectedIndex);
-}
-
-std::string MainMenu::getSelectedText() const
-{
-    if (selectedIndex >= 0 && selectedIndex < static_cast<int>(items.size()))
-    {
-        return items[selectedIndex];
-    }
-    return "";
-}
-
-void MainMenu::setSelected(int index)
-{
-    if (index >= 0 && index < static_cast<int>(items.size()))
-    {
-        selectedIndex = index;
-    }
-}
-
-MenuState MainMenu::getState() const
-{
-    return currentState;
-}
-
-void MainMenu::setState(MenuState state)
-{
-    currentState = state;
-}
-
-bool MainMenu::isActive() const
-{
-    return currentState == MENU_ACTIVE;
-}
-
-void MainMenu::addMenuItem(const std::string& item)
-{
-    items.push_back(item);
-}
-
-void MainMenu::removeMenuItem(int index)
-{
-    if (index >= 0 && index < static_cast<int>(items.size()))
-    {
-        items.erase(items.begin() + index);
-
-        if (selectedIndex >= static_cast<int>(items.size()))
-        {
-            selectedIndex = static_cast<int>(items.size()) - 1;
-        }
-        if (selectedIndex < 0 && !items.empty())
-        {
-            selectedIndex = 0;
-        }
-    }
-}
-
-void MainMenu::clearMenu()
-{
-    items.clear();
-    selectedIndex = 0;
-}
-
-void MainMenu::setColors(D3DCOLOR selected, D3DCOLOR normal)
-{
-    selectedColor = selected;
-    normalColor = normal;
-}
-
-void MainMenu::setPosition(const D3DXVECTOR2& position)
-{
-    menuPosition = position;
-}
-
-void MainMenu::setSpacing(float spacing)
-{
-    itemSpacing = spacing;
-}
-
-int MainMenu::getItemCount() const
-{
-    return static_cast<int>(items.size());
-}
-
-bool MainMenu::isEmpty() const
-{
-    return items.empty();
-}
+//
+// MainMenu::~MainMenu() {
+//     CleanupTextures();
+//     CleanupFonts();
+//     CleanupDirectInput();
+// }
+//
+// void MainMenu::Initialization(LPDIRECT3DDEVICE9 device, int width, int height, HWND hwnd) {
+//     d3dDevice = device;
+//     windowWidth = width;
+//     windowHeight = height;
+//     hWnd = hwnd;
+//
+//     D3DXCreateTextureFromFile(d3dDevice, "assets/Mainmenu2.png", &menuBackground);
+//     D3DXCreateTextureFromFile(d3dDevice, "assets/button_round_line.png", &playButtonTex);
+//     D3DXCreateTextureFromFile(d3dDevice, "assets/button_round_depth_line.png", &playButtonHoverTex);
+//
+//     int buttonWidth = 128;
+//     int buttonHeight = 128;
+//     playButtonRect.left   = 630;
+//     playButtonRect.top    = 300;
+//     playButtonRect.right  = playButtonRect.left + buttonWidth;
+//     playButtonRect.bottom = playButtonRect.top + buttonHeight;
+//
+//     CreateFontInterface();
+//     CreateTitleFont();
+//
+//     CreateDirectInput();
+// }
+//
+// void MainMenu::CreateDirectInput() {
+//     HRESULT hr = DirectInput8Create(GetModuleHandle(NULL), 0x0800, IID_IDirectInput8, (void**)&dInput, NULL);
+//     if (SUCCEEDED(hr)) {
+//         dInput->CreateDevice(GUID_SysKeyboard, &dInputKeyboardDevice, NULL);
+//         dInput->CreateDevice(GUID_SysMouse, &dInputMouseDevice, NULL);
+//
+//         if (dInputKeyboardDevice) {
+//             dInputKeyboardDevice->SetDataFormat(&c_dfDIKeyboard);
+//             dInputKeyboardDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+//         }
+//
+//         if (dInputMouseDevice) {
+//             dInputMouseDevice->SetDataFormat(&c_dfDIMouse);
+//             dInputMouseDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+//         }
+//
+//         if (dInputKeyboardDevice) dInputKeyboardDevice->Acquire();
+//         if (dInputMouseDevice) dInputMouseDevice->Acquire();
+//     }
+// }
+//
+// void MainMenu::CreateFontInterface() {
+//     D3DXCreateFont(d3dDevice, 20, 0, FW_BOLD, 1, FALSE,
+//                    DEFAULT_CHARSET, OUT_TT_ONLY_PRECIS, DEFAULT_QUALITY,
+//                    DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
+// }
+//
+// void MainMenu::CreateTitleFont() {
+//     D3DXCreateFont(d3dDevice, 120, 0, FW_BOLD, 1, TRUE,
+//                    DEFAULT_CHARSET, OUT_TT_ONLY_PRECIS, DEFAULT_QUALITY,
+//                    DEFAULT_PITCH | FF_DONTCARE, "Arial", &titleFont);
+// }
+//
+// void MainMenu::Update(const DIMOUSESTATE& mouseState, const BYTE* diKeys) {
+//     POINT mousePos;
+//     GetCursorPos(&mousePos);
+//     ScreenToClient(hWnd, &mousePos);
+//
+//     playButtonHovered = (mousePos.x >= playButtonRect.left &&
+//                          mousePos.x <= playButtonRect.right &&
+//                          mousePos.y >= playButtonRect.top &&
+//                          mousePos.y <= playButtonRect.bottom);
+//
+//     bool isMousePressed = (mouseState.rgbButtons[0] & 0x80);
+//
+//     if (playButtonHovered && isMousePressed) {
+//         playButtonPressed = true;
+//     } else {
+//         if (playButtonPressed && !isMousePressed) {
+//             playButtonClicked = true;
+//             std::cout << "Play button clicked!" << std::endl;
+//         }
+//         playButtonPressed = false;
+//     }
+// }
+//
+// void MainMenu::Render(LPD3DXSPRITE spriteBrush) {
+//     if (!spriteBrush) return;
+//
+//     if (menuBackground) {
+//         D3DSURFACE_DESC bgDesc;
+//         menuBackground->GetLevelDesc(0, &bgDesc);
+//
+//         float scaleX = (float)windowWidth / bgDesc.Width;
+//         float scaleY = (float)windowHeight / bgDesc.Height;
+//
+//         D3DXVECTOR2 bgScale(scaleX, scaleY);
+//         D3DXVECTOR2 bgPosition(0.0f, 0.0f);
+//
+//         D3DXMATRIX matBg;
+//         D3DXMatrixTransformation2D(&matBg, NULL, 0.0f, &bgScale, NULL, 0.0f, &bgPosition);
+//
+//         spriteBrush->SetTransform(&matBg);
+//         D3DXVECTOR3 bgPos(0, 0, 0);
+//         spriteBrush->Draw(menuBackground, NULL, NULL, &bgPos, D3DCOLOR_XRGB(255, 255, 255));
+//     }
+//
+//     D3DXMATRIX identity;
+//     D3DXMatrixIdentity(&identity);
+//     spriteBrush->SetTransform(&identity);
+//
+//     DrawButton(spriteBrush);
+//     DrawTitle(spriteBrush);
+// }
+//
+// void MainMenu::DrawTitle(LPD3DXSPRITE spriteBrush) {
+//     if (!titleFont) return;
+//
+//     RECT titleRect;
+//     SetRect(&titleRect, 0, 10, windowWidth, 150);
+//
+//     const char* fullText = "Initial";
+//     const char* lastChar = " D";
+//
+//     RECT shadowRect;
+//     for (int dx = -3; dx <= 3; dx++) {
+//         for (int dy = -3; dy <= 3; dy++) {
+//             if (dx == 0 && dy == 0) continue;
+//             shadowRect = titleRect;
+//             OffsetRect(&shadowRect, dx, dy);
+//             titleFont->DrawTextA(NULL, fullText, -1, &shadowRect,
+//                                  DT_CENTER | DT_VCENTER,
+//                                  D3DCOLOR_XRGB(0, 0, 0));
+//         }
+//     }
+//
+//     titleFont->DrawTextA(NULL, fullText, -1, &titleRect,
+//                          DT_CENTER | DT_VCENTER,
+//                          D3DCOLOR_XRGB(255, 255, 255));
+//
+//     RECT dRect = { windowWidth/2 + 50, 10, windowWidth, 150 };
+//     titleFont->DrawTextA(NULL, lastChar, -1, &dRect,
+//                          DT_LEFT | DT_VCENTER,
+//                          D3DCOLOR_XRGB(255, 0, 0));
+// }
+//
+// void MainMenu::DrawButton(LPD3DXSPRITE spriteBrush) {
+//     LPDIRECT3DTEXTURE9 texToDraw = playButtonHovered ? playButtonHoverTex : playButtonTex;
+//     if (!texToDraw) return;
+//
+//     D3DSURFACE_DESC desc;
+//     texToDraw->GetLevelDesc(0, &desc);
+//
+//     float scaleX = (float)(playButtonRect.right - playButtonRect.left) / desc.Width;
+//     float scaleY = (float)(playButtonRect.bottom - playButtonRect.top) / desc.Height;
+//
+//     D3DXVECTOR2 scaling(scaleX, scaleY);
+//     D3DXVECTOR2 position((float)playButtonRect.left, (float)playButtonRect.top);
+//
+//     D3DXMATRIX mat;
+//     D3DXMatrixTransformation2D(&mat, NULL, 0.0f, &scaling, NULL, 0.0f, &position);
+//     spriteBrush->SetTransform(&mat);
+//
+//     D3DXVECTOR3 pos(0, 0, 0);
+//     spriteBrush->Draw(texToDraw, NULL, NULL, &pos, D3DCOLOR_XRGB(255, 255, 255));
+//
+//     D3DXMATRIX identity;
+//     D3DXMatrixIdentity(&identity);
+//     spriteBrush->SetTransform(&identity);
+//
+//     if (fontBrush) {
+//         fontBrush->DrawTextA(NULL, "Play", -1, &playButtonRect,
+//                              DT_CENTER | DT_VCENTER,
+//                              D3DCOLOR_XRGB(255, 255, 255));
+//     }
+// }
+//
+// void MainMenu::CleanupDirectInput() {
+//     if (dInputKeyboardDevice) {
+//         dInputKeyboardDevice->Unacquire();
+//         dInputKeyboardDevice->Release();
+//         dInputKeyboardDevice = nullptr;
+//     }
+//     if (dInputMouseDevice) {
+//         dInputMouseDevice->Unacquire();
+//         dInputMouseDevice->Release();
+//         dInputMouseDevice = nullptr;
+//     }
+//     if (dInput) {
+//         dInput->Release();
+//         dInput = nullptr;
+//     }
+// }
+//
+// void MainMenu::CleanupTextures() {
+//     if (menuBackground) { menuBackground->Release(); menuBackground = nullptr; }
+//     if (playButtonTex) { playButtonTex->Release(); playButtonTex = nullptr; }
+//     if (playButtonHoverTex) { playButtonHoverTex->Release(); playButtonHoverTex = nullptr; }
+// }
+//
+// void MainMenu::CleanupFonts() {
+//     if (titleFont) { titleFont->Release(); titleFont = nullptr; }
+//     if (fontBrush) { fontBrush->Release(); fontBrush = nullptr; }
+// }

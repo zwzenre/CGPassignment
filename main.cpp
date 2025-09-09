@@ -1,5 +1,6 @@
 #include "src/Manager/Header/SceneManager.h"
-// #include "src/Scene/Header/Level1.h"
+#include "src/Scene/Header/Level1.h"
+#include "src/Scene/Header/MainMenuScene.h"
 
 int main() {
     SceneManager sceneManager;
@@ -9,7 +10,10 @@ int main() {
     }
 
     // Start with Level1 scene
-    // sceneManager.ChangeScene(new Level1());
+    //sceneManager.ChangeScene(new Level1());
+    sceneManager.ChangeScene(new MainMenuScene());
+
+
 
     // Main game loop
     while (sceneManager.WindowIsRunning()) {
