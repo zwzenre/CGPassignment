@@ -34,6 +34,7 @@ private:
 
     IDirect3DDevice9* d3dDevice;
     D3DPRESENT_PARAMETERS d3dPP{};
+    LPD3DXSPRITE spriteBrush;
 
     Scene* currentScene;
     Timer frameTimer;

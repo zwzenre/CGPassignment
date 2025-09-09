@@ -6,12 +6,17 @@
 
 SceneManager::SceneManager()
     : hWnd(nullptr), d3dDevice(nullptr), currentScene(nullptr),
-      inputManager(new InputManager()), soundManager(new SoundManager()) {}
+      inputManager(new InputManager()), soundManager(new SoundManager()),
+      spriteBrush(nullptr) {}
 
 SceneManager::~SceneManager() {
     Quit();
     delete inputManager;
     delete soundManager;
+    if (spriteBrush) {
+        spriteBrush->Release();
+        spriteBrush = nullptr;
+    }
 }
 
 bool SceneManager::Init() {
@@ -24,6 +29,11 @@ bool SceneManager::Init() {
 
     if (!CreateDirectX()) {
         MessageBox(nullptr, "Failed to initialize Direct3D!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    if (FAILED(D3DXCreateSprite(d3dDevice, &spriteBrush))) {
+        MessageBox(nullptr, "Failed to create sprite brush!", "Error", MB_OK | MB_ICONERROR);
         return false;
     }
 
@@ -69,11 +79,10 @@ void SceneManager::Render() {
     d3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 255, 255), 1.0f, 0);
 
     if (SUCCEEDED(d3dDevice->BeginScene())) {
-        if (currentScene) {
-            LPD3DXSPRITE sprite;
-            D3DXCreateSprite(d3dDevice, &sprite);
-            currentScene->Render(sprite);
-            sprite->Release();
+        if (currentScene && spriteBrush) {
+            spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
+            currentScene->Render(spriteBrush);
+            spriteBrush->End();
         }
         d3dDevice->EndScene();
     }
@@ -85,6 +94,10 @@ void SceneManager::Quit() {
         currentScene->Quit();
         delete currentScene;
         currentScene = nullptr;
+    }
+    if (spriteBrush) {
+        spriteBrush->Release();
+        spriteBrush = nullptr;
     }
     CleanupDirectX();
     CleanupWindow();
