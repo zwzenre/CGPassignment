@@ -18,7 +18,7 @@ int main() {
 
     // Start with Level1 scene (passing required dependencies)
     game.GetSceneManager()->ChangeScene(
-        new Level1(),
+        new MainMenuScene(),
         game.GetDevice(),
         game.GetInputManager(),
         game.GetSoundManager(),
@@ -26,14 +26,6 @@ int main() {
         game.GetWindowWidth(),   // Add screen width
         game.GetWindowHeight()   // Add screen height
     );
-
-    // game.GetSceneManager()->ChangeScene(
-    //         new MainMenuScene(),
-    //         game.GetDevice(),
-    //         game.GetInputManager(),
-    //         game.GetSoundManager(),
-    //         game.GetWindowWidth(),
-    //         game.GetWindowHeight());
 
     // Run the main game loop
     game.Run();
