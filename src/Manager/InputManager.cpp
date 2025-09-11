@@ -5,16 +5,18 @@
 #pragma comment(lib, "dxguid.lib")
 
 InputManager::InputManager()
-    : dInput(nullptr), dInputKeyboardDevice(nullptr), dInputMouseDevice(nullptr), hr(S_OK) {
+    : dInput(nullptr), dInputKeyboardDevice(nullptr), dInputMouseDevice(nullptr), hr(S_OK), hWnd(nullptr){
     ZeroMemory(diKeys, sizeof(diKeys));
     ZeroMemory(&mouseState, sizeof(mouseState));
 }
 
 InputManager::~InputManager() {
     // Cleanup in Quit() method instead
+    Quit();
 }
 
 bool InputManager::Initialize(HWND hWnd) {
+    this->hWnd = hWnd;
     // Create DirectInput interface
     hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
                            IID_IDirectInput8, (void**)&dInput, nullptr);
@@ -51,19 +53,34 @@ bool InputManager::Initialize(HWND hWnd) {
 
 void InputManager::Update() {
     // Update keyboard state
-    hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
-    if (FAILED(hr)) {
-        // Try to reacquire if lost focus
-        dInputKeyboardDevice->Acquire();
-        dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+    // hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+    // if (FAILED(hr)) {
+    //     // Try to reacquire if lost focus
+    //     dInputKeyboardDevice->Acquire();
+    //     dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+    // }
+    if (dInputKeyboardDevice) {
+        hr = dInputKeyboardDevice->Acquire();
+        hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+        if (FAILED(hr)) {
+            ZeroMemory(diKeys, sizeof(diKeys)); // 失败时清空状态
+        }
     }
 
+
     // Update mouse state
-    hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
-    if (FAILED(hr)) {
-        // Try to reacquire if lost focus
-        dInputMouseDevice->Acquire();
-        dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+    // hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+    // if (FAILED(hr)) {
+    //     // Try to reacquire if lost focus
+    //     dInputMouseDevice->Acquire();
+    //     dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+    // }
+    if (dInputMouseDevice) {
+        hr = dInputMouseDevice->Acquire();
+        hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+        if (FAILED(hr)) {
+            ZeroMemory(&mouseState, sizeof(mouseState)); // 失败时清空状态
+        }
     }
 }
 
@@ -86,12 +103,16 @@ void InputManager::Quit() {
 
 POINT InputManager::GetMousePosition() {
     POINT mousePos = {0, 0};
-    if (dInputMouseDevice) {
-        DIMOUSESTATE mouseState;
-        if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
-            GetCursorPos(&mousePos);
-            ScreenToClient(hWnd, &mousePos);
-        }
+    // if (dInputMouseDevice) {
+    //     DIMOUSESTATE mouseState;
+    //     if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
+    //         GetCursorPos(&mousePos);
+    //         ScreenToClient(hWnd, &mousePos);
+    //     }
+    // }
+    if (hWnd) {
+        GetCursorPos(&mousePos);
+        ScreenToClient(hWnd, &mousePos);
     }
     return mousePos;
 }

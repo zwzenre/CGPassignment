@@ -43,8 +43,15 @@ void MainMenuScene::Init(IDirect3DDevice9* device, InputManager* inputMgr, Sound
 
     int buttonWidth = 128;
     int buttonHeight = 128;
-    playButtonRect.left   = 630;
-    playButtonRect.top    = 300;
+
+    int centerX = windowWidth / 2;
+    int centerY = windowHeight / 2;
+
+    int buttonOffsetX = 50;
+    int buttonOffsetY = -10;
+
+    playButtonRect.left   = centerX - buttonWidth/2 + buttonOffsetX;
+    playButtonRect.top    = centerY - buttonHeight/2 + buttonOffsetY;
     playButtonRect.right  = playButtonRect.left + buttonWidth;
     playButtonRect.bottom = playButtonRect.top + buttonHeight;
 
@@ -85,10 +92,16 @@ void MainMenuScene::Render(LPD3DXSPRITE spriteBrush) {
         float scaleY = (float)windowHeight / bgDesc.Height;
 
         float scale = max(scaleX, scaleY);
+
+        scale *= 1.2f;
+
         D3DXVECTOR2 bgScale(scale, scale);
 
-        float offsetX = (windowWidth - bgDesc.Width * scale) / 2.0f;
-        float offsetY = (windowHeight - bgDesc.Height * scale) / 2.0f;
+        float scaledWidth = bgDesc.Width * scale;
+        float scaledHeight = bgDesc.Height * scale;
+
+        float offsetX = (windowWidth - scaledWidth) / 2.0f;
+        float offsetY = (windowHeight - scaledHeight) / 2.0f;
         D3DXVECTOR2 bgPosition(offsetX, offsetY);
 
         D3DXMATRIX matBg;
