@@ -1,101 +1,201 @@
 #include "Header/Game.h"
-#include <windows.h>
+#include <iostream>
 
-Game::Game()
-    : player(D3DXVECTOR2(200.0f, 200.0f)) { // spawn car at (200,200)
-}
+#pragma comment(lib, "d3d9.lib")
+#pragma comment(lib, "d3dx9.lib")
+
+Game::Game(HINSTANCE hInstance)
+    : hWnd(nullptr), d3dDevice(nullptr), spriteBrush(nullptr), isRunning(true) {}
 
 Game::~Game() {
-    Quit();
+    Shutdown();
 }
 
-void Game::Initialization(IDirect3DDevice9* device, HWND hWnd) {
-    d3dDevice = device;
+bool Game::Initialize() {
+    if (!CreateGameWindow(GetModuleHandle(nullptr))) {
+        std::cerr << "Failed to create game window!" << std::endl;
+        return false;
+    }
+
+    if (!InitializeDirectX()) {
+        std::cerr << "Failed to initialize DirectX!" << std::endl;
+        return false;
+    }
+
+    // Initialize input manager
+    if (!inputManager.Initialize(hWnd, d3dDevice, windowWidth, windowHeight)) {
+        std::cerr << "Failed to initialize input manager!" << std::endl;
+        return false;
+    }
+
+    // Initialize timer
+    timer.Init(60); // Target 60 FPS
 
     // Create sprite brush
-    hr = D3DXCreateSprite(d3dDevice, &spriteBrush);
-    if (FAILED(hr)) {
-        MessageBox(NULL, "Unable to create sprite brush", "ERROR", MB_ICONSTOP | MB_OK);
-        return;
+    if (FAILED(D3DXCreateSprite(d3dDevice, &spriteBrush))) {
+        std::cerr << "Failed to create sprite brush!" << std::endl;
+        return false;
     }
 
-    // Load car sprite sheet (512x512, 7 frames used)
-    hr = D3DXCreateTextureFromFile(d3dDevice, "assets/car.png", &carTexture);
-    if (FAILED(hr)) {
-        MessageBox(NULL, "Unable to load car texture (assets/car.png)", "ERROR", MB_ICONSTOP | MB_OK);
-        return;
-    }
+    ShowWindow(hWnd, SW_SHOW);
+    UpdateWindow(hWnd);
 
-    // Initialize timer and input manager
-    timer.Init(TARGET_FPS);
-
-    // Initialize InputManager with the window handle
-    inputManager.Initialize(hWnd);
-
-    // If you have sound initialization, you can uncomment / adapt:
-    // soundManager.InitializeAudio();
-    // soundManager.LoadSounds();
-    // soundManager.PlaySoundTrack();
+    return true;
 }
 
-void Game::Update() {
-    // Ask timer how many fixed-update frames we should run
-    int framesToUpdate = timer.FramesToUpdate();
-    if (framesToUpdate <= 0) return;
+bool Game::WindowIsRunning() {
+    MSG msg;
+    if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        if (msg.message == WM_QUIT) {
+            isRunning = false;
+            return false;
+        }
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return isRunning;
+}
 
-    // Poll input once per game loop
-    inputManager.Update();
+void Game::Run() {
+    while (WindowIsRunning()) {
+        // Update game state
+        int framesToUpdate = timer.FramesToUpdate();
+        for (int i = 0; i < framesToUpdate; ++i) {
+            inputManager.Update();
+            sceneManager.Update(timer.SecondsPerFrame());
+        }
 
-    // Gather button states once
-    bool forward  = inputManager.IsKeyDown(DIK_W) || inputManager.IsKeyDown(DIK_UP);
-    bool backward = inputManager.IsKeyDown(DIK_S) || inputManager.IsKeyDown(DIK_DOWN);
-    bool left     = inputManager.IsKeyDown(DIK_A) || inputManager.IsKeyDown(DIK_LEFT);
-    bool right    = inputManager.IsKeyDown(DIK_D) || inputManager.IsKeyDown(DIK_RIGHT);
+        // Render frame
+        d3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-    // Use fixed delta time derived from TARGET_FPS
-    const float deltaTime = 1.0f / static_cast<float>(Game::TARGET_FPS);
+        if (SUCCEEDED(d3dDevice->BeginScene())) {
+            // First: Render game scenes
+            if (spriteBrush) {
+                spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
+                sceneManager.Render(spriteBrush);
+                spriteBrush->End();
+            }
 
-    // Step physics / car logic that many times
-    for (int i = 0; i < framesToUpdate; ++i) {
-        // If you plan to centralize physics, call physicsManager here.
-        // For now RaceCar.Update handles movement + animation:
-        player.Update(deltaTime, forward, left, right, backward);
-        timer.SetTotalTime(time++);
+            inputManager.Render(spriteBrush);
 
-        // If you later want PhysicsManager to update the car:
-        // physicsManager.updateRaceCar(player, forward, backward, left, right, screenW, screenH);
+            d3dDevice->EndScene();
+        }
+        d3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
     }
 }
 
-void Game::Render() {
-    if (!d3dDevice) return;
+void Game::Shutdown() {
+    sceneManager.Quit();
 
-    d3dDevice->Clear(0, NULL, D3DCLEAR_TARGET,
-                     D3DCOLOR_XRGB(200, 200, 200), 1.0f, 0);
-    d3dDevice->BeginScene();
+    if (spriteBrush) {
+        spriteBrush->Release();
+        spriteBrush = nullptr;
+    }
 
-    if (spriteBrush) spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
+    if (inputManager.IsInitialized()) {
+        inputManager.Quit();
+    }
 
-    // Draw the player using the sprite sheet and the player's current frame
-    player.Render(spriteBrush, carTexture);
+    if (d3dDevice) {
+        d3dDevice->Release();
+        d3dDevice = nullptr;
+    }
 
-    RECT textRect;
-    textRect.left = 600;
-    textRect.top = 50;
-    textRect.right = 800;
-    textRect.bottom = 100;
-
-    fontBrush->DrawText(spriteBrush, timer.GetTimer().c_str(), -1, &textRect, DT_SINGLELINE, D3DCOLOR_XRGB(0, 0, 0));
-
-
-    if (spriteBrush) spriteBrush->End();
-    d3dDevice->EndScene();
-    d3dDevice->Present(NULL, NULL, NULL, NULL);
+    if (hWnd) {
+        DestroyWindow(hWnd);
+        hWnd = nullptr;
+    }
 }
 
-void Game::Quit() {
-    if (spriteBrush) { spriteBrush->Release(); spriteBrush = nullptr; }
-    if (fontBrush) { fontBrush->Release(); fontBrush = nullptr; }
-    if (lineBrush) { lineBrush->Release(); lineBrush = nullptr; }
-    if (carTexture) { carTexture->Release(); carTexture = nullptr; }
+void Game::ShowCursor(bool show) {
+    if (inputManager.GetCursor()) {
+        inputManager.GetCursor()->SetVisible(show);
+        ::ShowCursor(show);
+    }
+}
+
+bool Game::IsCursorVisible() const {
+    return inputManager.GetCursor() ? inputManager.GetCursor()->IsVisible() : false;
+}
+
+bool Game::CreateGameWindow(HINSTANCE hInstance) {
+    WNDCLASS wc = {};
+    wc.style = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = "GameWindowClass";
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+
+    if (!RegisterClass(&wc)) {
+        MessageBox(nullptr, "Failed to register window class!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    hWnd = CreateWindow(
+        "GameWindowClass",
+        "Car Racing Game",
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        windowWidth, windowHeight,
+        nullptr, nullptr,
+        hInstance, nullptr
+    );
+
+    if (!hWnd) {
+        MessageBox(nullptr, "Failed to create window!", "Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
+}
+
+bool Game::InitializeDirectX() {
+    IDirect3D9* d3d = Direct3DCreate9(D3D_SDK_VERSION);
+    if (!d3d) {
+        return false;
+    }
+
+    D3DPRESENT_PARAMETERS d3dpp = {};
+    d3dpp.Windowed = TRUE;
+    d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
+    d3dpp.BackBufferWidth = windowWidth;
+    d3dpp.BackBufferHeight = windowHeight;
+    d3dpp.hDeviceWindow = hWnd;
+    d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+
+    if (FAILED(d3d->CreateDevice(
+        D3DADAPTER_DEFAULT,
+        D3DDEVTYPE_HAL,
+        hWnd,
+        D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+        &d3dpp,
+        &d3dDevice
+    ))) {
+        d3d->Release();
+        return false;
+    }
+
+    d3d->Release();
+    return true;
+}
+
+LRESULT CALLBACK Game::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            return 0;
+
+        case WM_KEYDOWN:
+            if (wParam == VK_ESCAPE) {
+                PostQuitMessage(0);
+                return 0;
+            }
+            break;
+
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }

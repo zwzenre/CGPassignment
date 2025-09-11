@@ -1,60 +1,21 @@
 #include "Header/PhysicsManager.h"
-#include <algorithm>
 
-void PhysicsManager::updateRaceCar(RaceCar& car, bool forward, bool backward, bool left, bool right, int winWidth, int winHeight) {
-    D3DXVECTOR2 vel = car.GetVelocity();
-    float rot = car.GetRotation();
-
-    // acceleration
-    if (forward) {
-        vel.x += sin(rot) * accelerationRate;
-        vel.y += -cos(rot) * accelerationRate;
-    }
-    if (backward) {
-        vel.x -= sin(rot) * brakeRate;
-        vel.y -= -cos(rot) * brakeRate;
-    }
-
-    // steering
-    if (D3DXVec2Length(&vel) > 0.1f) {
-        if (left)  rot -= steeringAngle;
-        if (right) rot += steeringAngle;
-    }
-
-    // friction
-    vel.x *= (1.0f - friction);
-    vel.y *= (1.0f - friction);
-
-    // clamp speed
-    float speed = D3DXVec2Length(&vel);
-    if (speed > maxSpeed) {
-        D3DXVec2Normalize(&vel, &vel);
-        vel *= maxSpeed;
-    }
-
+void PhysicsManager::ConstrainToBounds(RaceCar& car) {
     D3DXVECTOR2 pos = car.GetPosition();
-    pos += vel;
+    RECT box = car.GetBoundingBox();
 
-    // boundary check
-    int w = car.GetWidth();
-    int h = car.GetHeight();
+    // Width/Height come directly from bounding box
+    int carWidth  = box.right - box.left;
+    int carHeight = box.bottom - box.top;
 
-    if (pos.x < 0) { pos.x = 0; vel.x *= -0.5f; }
-    if (pos.y < 0) { pos.y = 0; vel.y *= -0.5f; }
-    if (pos.x > winWidth - w) { pos.x = (float)(winWidth - w); vel.x *= -0.5f; }
-    if (pos.y > winHeight - h) { pos.y = (float)(winHeight - h); vel.y *= -0.5f; }
+    if (pos.x < 0) pos.x = 0;
+    if (pos.y < 0) pos.y = 0;
+    if (pos.x > screenWidth - carWidth)  pos.x = (float)(screenWidth - carWidth);
+    if (pos.y > screenHeight - carHeight) pos.y = (float)(screenHeight - carHeight);
 
-    car.SetVelocity(vel);
-    car.SetRotation(rot);
     car.SetPosition(pos);
 }
 
-bool PhysicsManager::checkCollision(const RaceCar& a, const RaceCar& b) {
-    RECT r1 = a.GetBoundingBox();
-    RECT r2 = b.GetBoundingBox();
-
-    return (r1.left < r2.right &&
-            r1.right > r2.left &&
-            r1.top < r2.bottom &&
-            r1.bottom > r2.top);
+void PhysicsManager::CheckCarObstacleCollision(RaceCar& car) {
+    // TODO: will be filled once Obstacle/Box class is ready
 }

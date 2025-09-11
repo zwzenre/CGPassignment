@@ -6,16 +6,18 @@
 
 class PhysicsManager {
 private:
-    float maxSpeed = 10.0f;
-    float accelerationRate = 0.2f;
-    float brakeRate = 0.3f;
-    float friction = 0.05f;
-    float steeringAngle = 0.05f;
+    int screenWidth;
+    int screenHeight;
 
 public:
-    void updateRaceCar(RaceCar& car, bool forward, bool backward, bool left, bool right, int winWidth, int winHeight);
-    bool checkCollision(const RaceCar& a, const RaceCar& b);
+    PhysicsManager(int winW, int winH)
+        : screenWidth(winW), screenHeight(winH) {}
 
+    // Keep car inside screen bounds
+    void ConstrainToBounds(RaceCar& car);
+
+    // Placeholder for future obstacle collisions
+    void CheckCarObstacleCollision(RaceCar& car);
 };
 
 #endif

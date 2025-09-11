@@ -10,7 +10,7 @@ RaceCar::RaceCar(D3DXVECTOR2 startPos)
       enginePower(300.0f),
       maxSpeed(400.0f),
       currentSpeed(0.0f),
-      accelerationRate(8.0f),
+      accelerationRate(5.0f),
       decelerationRate(2.0f),
       brakePower(6.0f),
       dragCoefficient(0.05f),
@@ -18,9 +18,6 @@ RaceCar::RaceCar(D3DXVECTOR2 startPos)
       steeringAngle(0.0f),
       maxSteeringAngle(0.1f),
       steeringSpeed(0.1f),
-      wheelBase(1.5f),
-      tireGrip(0.8f),
-      weightTransfer(0.1f),
       currentFrame(0),
       maxFrame(7),
       frameWidth(64),
@@ -28,69 +25,56 @@ RaceCar::RaceCar(D3DXVECTOR2 startPos)
       frameTimer(0.0f),
       frameDelay(0.08f) {}
 
-void RaceCar::Update(float deltaTime, bool moveForward, bool moveBackward, bool turnLeft, bool turnRight) {
-    ApplyPhysics(deltaTime, moveForward, moveBackward, turnLeft, turnRight);
-    UpdateSteering(deltaTime, turnLeft, turnRight);
-    UpdateAnimation(deltaTime, turnLeft, turnRight);
+void RaceCar::Update(float deltaTime, bool forward, bool backward, bool left, bool right) {
+    ApplyPhysics(deltaTime, forward, backward, left, right);
+    UpdateSteering(deltaTime, left, right);
+    UpdateAnimation(deltaTime, left, right);
 }
 
-void RaceCar::ApplyPhysics(float deltaTime, bool moveForward, bool moveBackward, bool turnLeft, bool turnRight) {
-    // ENGINE FORCE - MORE POWERFUL
+void RaceCar::ApplyPhysics(float deltaTime, bool forward, bool backward, bool left, bool right) {
     float engineForce = 0.0f;
-    if (moveForward) {
-        engineForce = enginePower * accelerationRate; // Added acceleration rate multiplier
+    if (forward) {
+        engineForce = enginePower * accelerationRate;
     }
 
-    // BRAKING/REVERSE FORCE - STRONGER
     float brakeForce = 0.0f;
-    if (moveBackward) {
+    if (backward) {
         if (currentSpeed > 0) {
-            brakeForce = brakePower * 2.0f; // Stronger braking
+            brakeForce = brakePower * 2.0f;
         } else {
-            engineForce = -enginePower * 0.8f; // Faster reverse
+            engineForce = -enginePower * 0.8f;
         }
     }
 
-    // DRAG FORCE - reduced further
     float dragForce = dragCoefficient * fabsf(currentSpeed) * currentSpeed;
-
-    // ROLLING RESISTANCE - reduced
     float rollingForce = rollingResistance * currentSpeed;
 
-    // NET FORCE
     float netForce = engineForce - brakeForce - dragForce - rollingForce;
-
-    // ACCELERATION - FASTER RESPONSE
     float acceleration = netForce;
-    currentSpeed += acceleration * deltaTime * 2.0f; // Doubled acceleration effect
 
-    // Clamp speed - faster maximums
-    if (moveBackward && currentSpeed < 0) {
-        currentSpeed = (std::max)(-maxSpeed * 0.8f, currentSpeed); // Faster reverse
+    currentSpeed += acceleration * deltaTime * 2.0f;
+
+    if (backward && currentSpeed < 0) {
+        currentSpeed = (std::max)(-maxSpeed * 0.8f, currentSpeed);
     } else {
         currentSpeed = (std::min)(maxSpeed, (std::max)(-maxSpeed * 0.8f, currentSpeed));
     }
 
-    // STEERING EFFECTS - SLOWER, MORE CONTROLLED
     if (fabsf(currentSpeed) > 1.0f && fabsf(steeringAngle) > 0.01f) {
-        // Speed-dependent steering (more controlled at all speeds)
         float speedFactor = 0.5f + (0.5f * (1.0f - (fabsf(currentSpeed) / maxSpeed) * 0.3f));
-        float turnRate = steeringAngle * currentSpeed * 0.2f * speedFactor; // Reduced turn rate
+        float turnRate = steeringAngle * currentSpeed * 0.2f * speedFactor;
         rotation += turnRate * deltaTime;
     }
 
-    // VELOCITY VECTOR
-    D3DXVECTOR2 forward(sinf(rotation), -cosf(rotation));
-    velocity = forward * currentSpeed;
-
-    // POSITION UPDATE
+    D3DXVECTOR2 forwardVec(sinf(rotation), -cosf(rotation));
+    velocity = forwardVec * currentSpeed;
     position += velocity * deltaTime;
 }
 
-void RaceCar::UpdateSteering(float deltaTime, bool turnLeft, bool turnRight) {
+void RaceCar::UpdateSteering(float deltaTime, bool left, bool right) {
     float steeringInput = 0.0f;
-    if (turnLeft) steeringInput -= 1.0f;
-    if (turnRight) steeringInput += 1.0f;
+    if (left)  steeringInput -= 1.0f;
+    if (right) steeringInput += 1.0f;
 
     float speedFactor = 0.7f + (0.3f * (1.0f - fabsf(currentSpeed) / maxSpeed));
     steeringAngle += steeringInput * steeringSpeed * speedFactor * deltaTime;
@@ -105,16 +89,17 @@ void RaceCar::UpdateSteering(float deltaTime, bool turnLeft, bool turnRight) {
             steeringAngle = (std::min)(0.0f, steeringAngle);
         }
     }
+
     steeringAngle = (std::max)(-maxSteeringAngle, (std::min)(steeringAngle, maxSteeringAngle));
 }
 
-void RaceCar::UpdateAnimation(float deltaTime, bool turnLeft, bool turnRight) {
+void RaceCar::UpdateAnimation(float deltaTime, bool left, bool right) {
     float animSpeedThreshold = 5.0f;
 
     if (fabsf(currentSpeed) > animSpeedThreshold) {
         frameTimer += deltaTime;
 
-        if (turnLeft && !turnRight) {
+        if (left && !right) {
             if (frameTimer >= frameDelay) {
                 frameTimer = 0.0f;
                 if (currentFrame >= 4 && currentFrame <= 6) {
@@ -124,7 +109,7 @@ void RaceCar::UpdateAnimation(float deltaTime, bool turnLeft, bool turnRight) {
                 }
             }
         }
-        else if (turnRight && !turnLeft) {
+        else if (right && !left) {
             if (frameTimer >= frameDelay) {
                 frameTimer = 0.0f;
                 if (currentFrame >= 1 && currentFrame <= 3) {
@@ -169,15 +154,7 @@ void RaceCar::Render(LPD3DXSPRITE spriteBrush, LPDIRECT3DTEXTURE9 texture) {
     D3DXVECTOR2 scaling(1.0f, 1.0f);
     D3DXVECTOR2 pivot(center.x, center.y);
 
-    D3DXMatrixTransformation2D(
-        &mat,
-        nullptr,
-        0.0f,
-        &scaling,
-        &pivot,
-        rotation,
-        &trans
-    );
+    D3DXMatrixTransformation2D(&mat, nullptr, 0.0f, &scaling, &pivot, rotation, &trans);
 
     spriteBrush->SetTransform(&mat);
     spriteBrush->Draw(texture, &srcRect, nullptr, nullptr, D3DCOLOR_XRGB(255, 255, 255));
@@ -186,4 +163,13 @@ void RaceCar::Render(LPD3DXSPRITE spriteBrush, LPDIRECT3DTEXTURE9 texture) {
     D3DXMATRIX identity;
     D3DXMatrixIdentity(&identity);
     spriteBrush->SetTransform(&identity);
+}
+
+RECT RaceCar::GetBoundingBox() const {
+    RECT box;
+    box.left   = static_cast<LONG>(position.x);
+    box.top    = static_cast<LONG>(position.y);
+    box.right  = static_cast<LONG>(position.x + frameWidth);
+    box.bottom = static_cast<LONG>(position.y + frameHeight);
+    return box;
 }
