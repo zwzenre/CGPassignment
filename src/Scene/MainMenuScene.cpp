@@ -21,16 +21,32 @@ void MainMenuScene::Init(IDirect3DDevice9* device, InputManager* inputMgr, Sound
     this->windowWidth = screenWidth;
     this->windowHeight = screenHeight;
 
-    // Load textures
-    if (FAILED(D3DXCreateTextureFromFile(this->d3dDevice, "assets/menu/menuBackground.png", &this->menuBackground))) {
-        MessageBox(nullptr, "Failed to load menu background", "Error", MB_OK);
-    }
-    if (FAILED(D3DXCreateTextureFromFile(this->d3dDevice, "assets/menu/playButton.png", &this->playButtonTex))) {
-        MessageBox(nullptr, "Failed to load play button", "Error", MB_OK);
-    }
-    if (FAILED(D3DXCreateTextureFromFile(this->d3dDevice, "assets/menu/playButtonHover.png", &this->playButtonHoverTex))) {
-        MessageBox(nullptr, "Failed to load play button hover", "Error", MB_OK);
-    }
+    D3DDEVICE_CREATION_PARAMETERS params;
+    device->GetCreationParameters(&params);
+    hWnd = params.hFocusWindow;
+
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+    windowWidth = rect.right - rect.left;
+    windowHeight = rect.bottom - rect.top;
+
+    D3DXCreateTextureFromFile(d3dDevice, "assets/Mainmenu2.png", &menuBackground);
+    D3DXCreateTextureFromFile(d3dDevice, "assets/button_round_line.png", &playButtonTex);
+    D3DXCreateTextureFromFile(d3dDevice, "assets/button_round_depth_line.png", &playButtonHoverTex);
+
+    int buttonWidth = 128;
+    int buttonHeight = 128;
+
+    int centerX = windowWidth / 2;
+    int centerY = windowHeight / 2;
+
+    int buttonOffsetX = 50;
+    int buttonOffsetY = -10;
+
+    playButtonRect.left   = centerX - buttonWidth/2 + buttonOffsetX;
+    playButtonRect.top    = centerY - buttonHeight/2 + buttonOffsetY;
+    playButtonRect.right  = playButtonRect.left + buttonWidth;
+    playButtonRect.bottom = playButtonRect.top + buttonHeight;
 
     this->CreateFontInterface();
     this->CreateTitleFont();
@@ -41,18 +57,43 @@ void MainMenuScene::Update(float deltaTime) {
     // Handle button hover, clicks, etc.
 }
 
-void MainMenuScene::Render(LPD3DXSPRITE sprite) {
-    if (!this->menuBackground) return;
+void MainMenuScene::Render(LPD3DXSPRITE spriteBrush) {
+    if (!spriteBrush) return;
 
-    sprite->Begin(D3DXSPRITE_ALPHABLEND);
+    if (menuBackground) {
+        D3DSURFACE_DESC bgDesc;
+        menuBackground->GetLevelDesc(0, &bgDesc);
 
-    // Render background
-    D3DXVECTOR3 bgPos(0, 0, 0);
-    sprite->Draw(this->menuBackground, nullptr, nullptr, &bgPos, D3DCOLOR_XRGB(255, 255, 255));
+        float scaleX = (float)windowWidth / bgDesc.Width;
+        float scaleY = (float)windowHeight / bgDesc.Height;
 
-    // Render buttons and text will go here
+        float scale = max(scaleX, scaleY);
 
-    sprite->End();
+        scale = 1.2f;
+
+        D3DXVECTOR2 bgScale(scale, scale);
+
+        float scaledWidth = bgDesc.Width scale;
+        float scaledHeight = bgDesc.Height * scale;
+
+        float offsetX = (windowWidth - scaledWidth) / 2.0f;
+        float offsetY = (windowHeight - scaledHeight) / 2.0f;
+        D3DXVECTOR2 bgPosition(offsetX, offsetY);
+
+        D3DXMATRIX matBg;
+        D3DXMatrixTransformation2D(&matBg, NULL, 0.0f, &bgScale, NULL, 0.0f, &bgPosition);
+
+        spriteBrush->SetTransform(&matBg);
+        D3DXVECTOR3 bgPos(0, 0, 0);
+        spriteBrush->Draw(menuBackground, NULL, NULL, &bgPos, D3DCOLOR_XRGB(255, 255, 255));
+    }
+
+    D3DXMATRIX identity;
+    D3DXMatrixIdentity(&identity);
+    spriteBrush->SetTransform(&identity);
+
+    DrawButton(spriteBrush);
+    DrawTitle(spriteBrush);
 }
 
 void MainMenuScene::Quit() {

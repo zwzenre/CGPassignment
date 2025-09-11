@@ -5,7 +5,6 @@ InputManager::InputManager()
       dInputKeyboardDevice(nullptr), dInputMouseDevice(nullptr),
       m_cursor(nullptr), m_initialized(false),
       screenWidth(1280), screenHeight(720) {
-
     ZeroMemory(diKeys, sizeof(diKeys));
     ZeroMemory(prevDiKeys, sizeof(prevDiKeys));
     ZeroMemory(&mouseState, sizeof(mouseState));
@@ -56,19 +55,21 @@ bool InputManager::Initialize(HWND hWnd, LPDIRECT3DDEVICE9 d3dDevice, int screen
 void InputManager::Update() {
     memcpy(prevDiKeys, diKeys, sizeof(diKeys));
     prevMouseState = mouseState;
-
-    // Keyboard state
-    hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
-    if (FAILED(hr)) {
-        dInputKeyboardDevice->Acquire();
-        dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+  
+    if (dInputKeyboardDevice) {
+        hr = dInputKeyboardDevice->Acquire();
+        hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
+        if (FAILED(hr)) {
+            ZeroMemory(diKeys, sizeof(diKeys)); 
+        }
     }
-
-    // Mouse state
-    hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
-    if (FAILED(hr)) {
-        dInputMouseDevice->Acquire();
-        dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+  
+    if (dInputMouseDevice) {
+        hr = dInputMouseDevice->Acquire();
+        hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+        if (FAILED(hr)) {
+            ZeroMemory(&mouseState, sizeof(mouseState)); 
+        }
     }
 
     // Update custom cursor with DirectInput deltas
@@ -103,8 +104,7 @@ void InputManager::Quit() {
         dInput->Release();
         dInput = nullptr;
     }
-
-    m_initialized = false;
+     m_initialized = false;
 }
 
 bool InputManager::IsKeyDown(int dik) const {
