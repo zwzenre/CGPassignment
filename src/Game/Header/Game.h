@@ -31,6 +31,12 @@ public:
     void Run();
     void Shutdown();
 
+    // Scene transition methods
+    void InitializeMainMenu();
+    void TransitionToLevel1();
+    void TransitionToMainMenu();
+    void HandleSceneTransitions();
+
     // Getters for subsystems
     HWND GetWindowHandle() const { return hWnd; }
     IDirect3DDevice9* GetDevice() const { return d3dDevice; }
@@ -42,9 +48,12 @@ public:
     int GetWindowHeight() const { return windowHeight; }
     void ShowCursor(bool show);
     bool IsCursorVisible() const;
+    bool isFullScreen = false;
+    RECT windowRect;
 
 private:
     bool CreateGameWindow(HINSTANCE hInstance);
     bool InitializeDirectX();
+    void ToggleFullscreen();
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };

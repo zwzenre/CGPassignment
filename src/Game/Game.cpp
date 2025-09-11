@@ -1,4 +1,6 @@
 #include "Header/Game.h"
+#include "../Scene/Header/MainMenuScene.h"  // Add this include
+#include "../Scene/Header/Level1.h"         // Add this include
 #include <iostream>
 
 #pragma comment(lib, "d3d9.lib")
@@ -29,7 +31,7 @@ bool Game::Initialize() {
     }
 
     // Initialize timer
-    timer.Init(60); // Target 60 FPS
+    timer.Init(60);
 
     // Create sprite brush
     if (FAILED(D3DXCreateSprite(d3dDevice, &spriteBrush))) {
@@ -37,10 +39,31 @@ bool Game::Initialize() {
         return false;
     }
 
+    // Initialize with MainMenu scene
+    InitializeMainMenu();
+
     ShowWindow(hWnd, SW_SHOW);
     UpdateWindow(hWnd);
 
     return true;
+}
+
+void Game::InitializeMainMenu() {
+    MainMenuScene* mainMenu = new MainMenuScene();
+    sceneManager.ChangeScene(mainMenu, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    std::cout << "Game started with Main Menu" << std::endl;
+}
+
+void Game::TransitionToLevel1() {
+    Level1* level1Scene = new Level1();
+    sceneManager.ChangeScene(level1Scene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    std::cout << "Transitioned to Level 1!" << std::endl;
+}
+
+void Game::TransitionToMainMenu() {
+    MainMenuScene* mainMenu = new MainMenuScene();
+    sceneManager.ChangeScene(mainMenu, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    std::cout << "Returned to Main Menu" << std::endl;
 }
 
 bool Game::WindowIsRunning() {
@@ -62,6 +85,10 @@ void Game::Run() {
         int framesToUpdate = timer.FramesToUpdate();
         for (int i = 0; i < framesToUpdate; ++i) {
             inputManager.Update();
+
+            // Handle scene transitions BEFORE updating the scene
+            HandleSceneTransitions();
+
             sceneManager.Update(timer.SecondsPerFrame());
         }
 
@@ -69,19 +96,41 @@ void Game::Run() {
         d3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
         if (SUCCEEDED(d3dDevice->BeginScene())) {
-            // First: Render game scenes
             if (spriteBrush) {
                 spriteBrush->Begin(D3DXSPRITE_ALPHABLEND);
+
                 sceneManager.Render(spriteBrush);
+                inputManager.Render(spriteBrush);
+
                 spriteBrush->End();
             }
-
-            inputManager.Render(spriteBrush);
-
             d3dDevice->EndScene();
         }
         d3dDevice->Present(nullptr, nullptr, nullptr, nullptr);
     }
+}
+
+void Game::HandleSceneTransitions() {
+    Scene* currentScene = sceneManager.GetCurrentScene();
+    if (!currentScene) return;
+
+    // Check if we're in MainMenu and play button was clicked
+    MainMenuScene* mainMenu = dynamic_cast<MainMenuScene*>(currentScene);
+    if (mainMenu && mainMenu->IsPlayButtonClicked()) {
+        mainMenu->ResetPlayButton();
+        TransitionToLevel1();
+        return;
+    }
+
+    // Check if we're in Level1 and should return to menu (ESC key)
+    Level1* level1 = dynamic_cast<Level1*>(currentScene);
+    if (level1 && inputManager.IsKeyDown(DIK_ESCAPE)) {
+        TransitionToMainMenu();
+        return;
+    }
+
+    // Add more transition logic here as needed
+    // if (level1 && level1->IsLevelComplete()) { TransitionToLevel2(); }
 }
 
 void Game::Shutdown() {
@@ -139,7 +188,7 @@ bool Game::CreateGameWindow(HINSTANCE hInstance) {
         CW_USEDEFAULT, CW_USEDEFAULT,
         windowWidth, windowHeight,
         nullptr, nullptr,
-        hInstance, nullptr
+        hInstance, this
     );
 
     if (!hWnd) {
@@ -181,21 +230,55 @@ bool Game::InitializeDirectX() {
     return true;
 }
 
+void Game::ToggleFullscreen() {
+    if (!isFullScreen) {
+        // Save current window rect
+        GetWindowRect(hWnd, &windowRect);
+
+        SetWindowLong(hWnd, GWL_STYLE, WS_POPUP);
+        SetWindowPos(hWnd, HWND_TOP, 0, 0,
+            GetSystemMetrics(SM_CXSCREEN),
+            GetSystemMetrics(SM_CYSCREEN),
+            SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+        isFullScreen = true;
+    } else {
+        SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+        SetWindowPos(hWnd, HWND_TOP,
+            windowRect.left, windowRect.top,
+            windowRect.right - windowRect.left,
+            windowRect.bottom - windowRect.top,
+            SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+        isFullScreen = false;
+    }
+}
+
 LRESULT CALLBACK Game::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
+    Game* game = nullptr;
+
+    if (message == WM_NCCREATE) {
+        CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+        game = reinterpret_cast<Game*>(cs->lpCreateParams);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)game);
+    } else {
+        game = reinterpret_cast<Game*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    }
+
+    if (game) {
+        switch (message) {
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
 
         case WM_KEYDOWN:
-            if (wParam == VK_ESCAPE) {
-                PostQuitMessage(0);
+            // Remove ESC quit from here since Level1 uses ESC to return to menu
+            if (wParam == 'F') {
+                game->ToggleFullscreen();
                 return 0;
             }
             break;
-
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
     }
-    return 0;
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }

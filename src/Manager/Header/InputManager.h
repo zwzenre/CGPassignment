@@ -27,6 +27,9 @@ public:
     bool CreateCursor(const char* texturePath = "assets/cursor.png");
     void SetCursorVisible(bool visible);
     bool IsCursorVisible() const;
+    D3DXVECTOR2 GetCursorPosition() const {
+        return m_cursor ? m_cursor->GetPosition() : D3DXVECTOR2(0, 0);
+    }
 
     bool IsInitialized() const { return m_initialized; }
 

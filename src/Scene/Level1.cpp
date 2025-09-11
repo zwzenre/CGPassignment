@@ -34,9 +34,6 @@ void Level1::Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager
     gameCursor = input->GetCursor();  // Get the existing cursor from InputManager
 
     CreateFont();
-
-    // Output debug info
-    OutputDebugString("Level1 Initialized - RaceCar and Cursor ready for testing!\n");
 }
 
 void Level1::Update(float deltaTime) {
@@ -57,38 +54,13 @@ void Level1::Update(float deltaTime) {
     if (pos.y < 0) pos.y = screenHeight;
     if (pos.y > screenHeight) pos.y = 0;
     playerCar->SetPosition(pos);
-
-    static float debugTimer = 0;
-    debugTimer += deltaTime;
-    if (debugTimer > 2.0f) {
-        debugTimer = 0;
-
-        std::stringstream ss;
-        ss << "=== Level1 Debug ===\n";
-        ss << "Car Position: (" << (int)pos.x << ", " << (int)pos.y << ")\n";
-
-        if (gameCursor) {
-            D3DXVECTOR2 cursorPos = gameCursor->GetPosition();
-            ss << "Cursor Position: (" << (int)cursorPos.x << ", " << (int)cursorPos.y << ")\n";
-        }
-
-        ss << "Controls: WASD/Arrows = Drive, Mouse = Move Cursor\n";
-        ss << "========================\n";
-
-        OutputDebugString(ss.str().c_str());
-    }
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
     if (!carTexture || !playerCar) return;
 
-    sprite->Begin(D3DXSPRITE_ALPHABLEND);
-
     // Render the race car
     playerCar->Render(sprite, carTexture);
-    gameCursor->Render(sprite);
-
-    sprite->End();
 }
 
 void Level1::Quit() {
@@ -105,8 +77,6 @@ void Level1::Quit() {
     }
 
     CleanupFont();
-
-    OutputDebugString("Level1 Cleaned Up\n");
 }
 
 void Level1::CreateFont() {

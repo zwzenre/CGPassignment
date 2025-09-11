@@ -10,9 +10,8 @@ public:
     MainMenuScene();
     ~MainMenuScene() override;
 
-    // Scene interface implementation - FIXED SIGNATURE
     void Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager* soundMgr,
-              HWND hWnd = nullptr, int screenWidth = 1280, int screenHeight = 720) override;
+              HWND hWnd, int screenWidth, int screenHeight) override;
     void Update(float deltaTime) override;
     void Render(LPD3DXSPRITE spriteBrush) override;
     void Quit() override;
@@ -44,6 +43,9 @@ private:
     void CreateTitleFont();
     void DrawTitle(LPD3DXSPRITE spriteBrush);
     void DrawButton(LPD3DXSPRITE spriteBrush);
-    void CleanupFontInterface();
+
+    void CleanupDrawButton();
+
     void CleanupTextures();
+    void CleanupFonts();
 };
