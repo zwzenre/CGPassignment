@@ -34,7 +34,9 @@ add_executable(Game main.cpp
         src/Scene/Header/Scene.h
         src/Game/Mainmenu.cpp
         src/Game/Header/Mainmenu.h
-        src/Scene/MainMenuScene.cpp)
+        src/Scene/MainMenuScene.cpp
+        src/Game/Cursor.cpp
+        src/Game/Header/Cursor.h)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
@@ -75,6 +77,7 @@ set(GAME_ASSETS
         assets/button_square_line.png
         assets/button_round_line.png
         assets/car.png
+        assets/cursor.png
 )
 
 add_custom_command(

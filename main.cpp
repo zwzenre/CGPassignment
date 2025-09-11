@@ -1,29 +1,45 @@
-#include "src/Manager/Header/SceneManager.h"
+#include "src/Game/Header/Game.h"
 #include "src/Scene/Header/Level1.h"
 #include "src/Scene/Header/MainMenuScene.h"
-#include "src/Timer/Header/Timer.h"
 #include <iostream>
 
 int main() {
-    SceneManager sceneManager;
-    Timer timer;
-    int time = 0;
+    // Get the instance handle
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
 
-    if (!sceneManager.Init()) {
+    // Create the main Game object
+    Game game(hInstance);
+
+    // Initialize the game (creates window, DirectX, etc.)
+    if (!game.Initialize()) {
+        std::cerr << "Failed to initialize game!" << std::endl;
         return -1;
     }
 
-    // Start with Level1 scene
-    //sceneManager.ChangeScene(new Level1());
-    sceneManager.ChangeScene(new MainMenuScene());
+    // Start with Level1 scene (passing required dependencies)
+    game.GetSceneManager()->ChangeScene(
+        new Level1(),
+        game.GetDevice(),
+        game.GetInputManager(),
+        game.GetSoundManager(),
+        game.GetWindowHandle(),  // Add HWND parameter
+        game.GetWindowWidth(),   // Add screen width
+        game.GetWindowHeight()   // Add screen height
+    );
 
-    // Main game loop
-    while (sceneManager.WindowIsRunning()) {
-        sceneManager.Update();
-        sceneManager.Render();
-        timer.SetTotalTime(time++);
-    }
+    // game.GetSceneManager()->ChangeScene(
+    //         new MainMenuScene(),
+    //         game.GetDevice(),
+    //         game.GetInputManager(),
+    //         game.GetSoundManager(),
+    //         game.GetWindowWidth(),
+    //         game.GetWindowHeight());
 
-    sceneManager.Quit();
+    // Run the main game loop
+    game.Run();
+
+    // Cleanup
+    game.Shutdown();
+
     return 0;
 }

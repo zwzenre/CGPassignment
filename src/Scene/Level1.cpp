@@ -2,62 +2,92 @@
 #include <string>
 #include <windows.h>
 #include <d3dx9.h>
+#include <sstream>
 
 Level1::Level1()
-    : device(nullptr), carTexture(nullptr), input(nullptr),
-      sound(nullptr), playerCar(nullptr), fontBrush(nullptr) {}
+    : device(nullptr), carTexture(nullptr),
+      input(nullptr), sound(nullptr), playerCar(nullptr),
+      gameCursor(nullptr), fontBrush(nullptr), screenWidth(1280), screenHeight(720) {}
 
 Level1::~Level1() {
     Quit();
 }
 
-void Level1::Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager* soundMgr) {
+void Level1::Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager* soundMgr,
+                 HWND hWnd, int screenWidth, int screenHeight) {
     this->device = device;
-    input = inputMgr;
-    sound = soundMgr;
+    this->input = inputMgr;
+    this->sound = soundMgr;
+    this->hWnd = hWnd;
+    this->screenWidth = screenWidth;
+    this->screenHeight = screenHeight;
 
+    // Load car texture
     if (FAILED(D3DXCreateTextureFromFile(device, "assets/car.png", &carTexture))) {
         MessageBox(nullptr, "Failed to load car.png", "Error", MB_OK);
     }
 
-    playerCar = new RaceCar(D3DXVECTOR2(400, 300));
+    // Initialize game objects
+    playerCar = new RaceCar(D3DXVECTOR2(screenWidth / 2, screenHeight / 2));
+
+    // Use the cursor from InputManager instead of creating our own
+    gameCursor = input->GetCursor();  // Get the existing cursor from InputManager
+
     CreateFont();
+
+    // Output debug info
+    OutputDebugString("Level1 Initialized - RaceCar and Cursor ready for testing!\n");
 }
 
 void Level1::Update(float deltaTime) {
     if (!input || !playerCar) return;
 
+    input->SetCursorVisible(true);
     // Get input for both WASD and Arrow keys
     bool moveForward = input->IsKeyDown(DIK_UP) || input->IsKeyDown(DIK_W);
     bool moveBackward = input->IsKeyDown(DIK_DOWN) || input->IsKeyDown(DIK_S);
     bool turnLeft = input->IsKeyDown(DIK_LEFT) || input->IsKeyDown(DIK_A);
     bool turnRight = input->IsKeyDown(DIK_RIGHT) || input->IsKeyDown(DIK_D);
 
-    // Update car physics with both control schemes
     playerCar->Update(deltaTime, moveForward, moveBackward, turnLeft, turnRight);
 
-    // Handle screen boundaries
     D3DXVECTOR2 pos = playerCar->GetPosition();
-    if (pos.x < 0) pos.x = 1280;
-    if (pos.x > 1280) pos.x = 0;
-    if (pos.y < 0) pos.y = 720;
-    if (pos.y > 720) pos.y = 0;
+    if (pos.x < 0) pos.x = screenWidth;
+    if (pos.x > screenWidth) pos.x = 0;
+    if (pos.y < 0) pos.y = screenHeight;
+    if (pos.y > screenHeight) pos.y = 0;
     playerCar->SetPosition(pos);
+
+    static float debugTimer = 0;
+    debugTimer += deltaTime;
+    if (debugTimer > 2.0f) {
+        debugTimer = 0;
+
+        std::stringstream ss;
+        ss << "=== Level1 Debug ===\n";
+        ss << "Car Position: (" << (int)pos.x << ", " << (int)pos.y << ")\n";
+
+        if (gameCursor) {
+            D3DXVECTOR2 cursorPos = gameCursor->GetPosition();
+            ss << "Cursor Position: (" << (int)cursorPos.x << ", " << (int)cursorPos.y << ")\n";
+        }
+
+        ss << "Controls: WASD/Arrows = Drive, Mouse = Move Cursor\n";
+        ss << "========================\n";
+
+        OutputDebugString(ss.str().c_str());
+    }
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
     if (!carTexture || !playerCar) return;
 
     sprite->Begin(D3DXSPRITE_ALPHABLEND);
+
+    // Render the race car
     playerCar->Render(sprite, carTexture);
+    gameCursor->Render(sprite);
 
-//    RECT textRect;
-//    textRect.left = 600;
-//    textRect.top = 50;
-//    textRect.right = 800;
-//    textRect.bottom = 100;
-
-//    fontBrush->DrawText(sprite, gameTimer.GetTimer().c_str(), -1, &textRect, DT_SINGLELINE, D3DCOLOR_XRGB(0, 0, 0));
     sprite->End();
 }
 
@@ -66,17 +96,23 @@ void Level1::Quit() {
         carTexture->Release();
         carTexture = nullptr;
     }
+
+    gameCursor = nullptr;
+
     if (playerCar) {
         delete playerCar;
         playerCar = nullptr;
     }
+
     CleanupFont();
+
+    OutputDebugString("Level1 Cleaned Up\n");
 }
 
 void Level1::CreateFont() {
     if (device) {
-        D3DXCreateFont(device, 25, 0, 0, 1, false,
-                      DEFAULT_CHARSET, OUT_TT_ONLY_PRECIS, DEFAULT_QUALITY,
+        D3DXCreateFont(device, 18, 0, FW_BOLD, 1, false,
+                      DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY,
                       DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
     }
 }

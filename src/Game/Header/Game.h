@@ -1,50 +1,50 @@
 #pragma once
-#include "../../Timer/Header/Timer.h"
-#include "../../Manager/Header/SoundManager.h"
-#include "../../Manager/Header/PhysicsManager.h"
-#include "../../Manager/Header/InputManager.h"
-#include "RaceCar.h"
+#include <Windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
-
-#pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "d3dx9.lib")
-
-#ifndef GAME_GAME_H
-#define GAME_GAME_H
+#include "../../Timer/Header/Timer.h"
+#include "../../Manager/Header/InputManager.h"
+#include "../../Manager/Header/SoundManager.h"
+#include "../../Manager/Header/SceneManager.h"
 
 class Game {
 private:
+    HWND hWnd;
+    IDirect3DDevice9* d3dDevice;
+    LPD3DXSPRITE spriteBrush;
+
     Timer timer;
-    SoundManager soundManager;
-    PhysicsManager physicsManager;
     InputManager inputManager;
+    SoundManager soundManager;
+    SceneManager sceneManager;
 
-    int level = 1;
-    HRESULT hr;
-
-    LPD3DXSPRITE spriteBrush = nullptr;
-    LPD3DXFONT fontBrush = nullptr;
-    LPD3DXLINE lineBrush = nullptr;
-    D3DPRESENT_PARAMETERS d3dPP {};
-    IDirect3DDevice9* d3dDevice = nullptr;
-
-    LPDIRECT3DTEXTURE9 carTexture = nullptr;
-
-    RaceCar player;
-
-    static constexpr int TARGET_FPS = 120;
-
-    int time = 0;
+    bool isRunning;
+    const int windowWidth = 1280;
+    const int windowHeight = 720;
 
 public:
-    Game();
+    Game(HINSTANCE hInstance);
     ~Game();
 
-    void Initialization(IDirect3DDevice9* device, HWND hWnd);
-    void Update();
-    void Render();
-    void Quit();
-};
+    bool Initialize();
+    bool WindowIsRunning();
+    void Run();
+    void Shutdown();
 
-#endif
+    // Getters for subsystems
+    HWND GetWindowHandle() const { return hWnd; }
+    IDirect3DDevice9* GetDevice() const { return d3dDevice; }
+    LPD3DXSPRITE GetSpriteBrush() const { return spriteBrush; }
+    InputManager* GetInputManager() { return &inputManager; }
+    SoundManager* GetSoundManager() { return &soundManager; }
+    SceneManager* GetSceneManager() { return &sceneManager; }
+    int GetWindowWidth() const { return windowWidth; }
+    int GetWindowHeight() const { return windowHeight; }
+    void ShowCursor(bool show);
+    bool IsCursorVisible() const;
+
+private:
+    bool CreateGameWindow(HINSTANCE hInstance);
+    bool InitializeDirectX();
+    static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+};

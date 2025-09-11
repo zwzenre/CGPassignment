@@ -8,22 +8,26 @@ void Timer::Init(int fps) {
     QueryPerformanceCounter(&timePrevious);
 
     requestedFPS = fps;
-
     intervalsPerFrame = (float)(timerFreq.QuadPart / requestedFPS);
     totalTime = 0.0f;
+    deltaTime = 0.0f;
 }
 
 int Timer::FramesToUpdate() {
     int framesToUpdate = 0;
     QueryPerformanceCounter(&timeNow);
 
-    // Get delta time
-    intervalsSinceLastUpdate = (float)timeNow.QuadPart - (float)timePrevious.QuadPart;
+    intervalsSinceLastUpdate = (float)(timeNow.QuadPart - timePrevious.QuadPart);
 
     framesToUpdate = (int)(intervalsSinceLastUpdate / intervalsPerFrame);
 
-    if (framesToUpdate != 0)
-        QueryPerformanceCounter(&timePrevious);
+    if (intervalsSinceLastUpdate > 0) {
+        deltaTime = intervalsSinceLastUpdate / (float)timerFreq.QuadPart;
+    }
+
+    if (framesToUpdate != 0) {
+        timePrevious = timeNow;
+    }
 
     return framesToUpdate;
 }
@@ -31,10 +35,6 @@ int Timer::FramesToUpdate() {
 std::string Timer::GetTimer() {
     int minutes = totalTime / 60;
     int seconds = totalTime % 60;
-
-//    interval += 0.5;
-//
-//    if ((int)interval % 2 == 0) totalTime++;
 
     std::string minStr = (minutes < 10) ? "0" + std::to_string(minutes) : std::to_string(minutes);
     std::string secStr = (seconds < 10) ? "0" + std::to_string(seconds) : std::to_string(seconds);
@@ -44,4 +44,12 @@ std::string Timer::GetTimer() {
 
 void Timer::SetTotalTime(int time) {
     totalTime = time;
+}
+
+float Timer::GetDeltaTime() {
+    return deltaTime;
+}
+
+float Timer::SecondsPerFrame() const {
+    return 1.0f / requestedFPS;
 }

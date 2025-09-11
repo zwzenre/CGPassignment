@@ -1,73 +1,94 @@
 #include "Header/InputManager.h"
-#include <dinput.h>
-
-#pragma comment(lib, "dinput8.lib")
-#pragma comment(lib, "dxguid.lib")
 
 InputManager::InputManager()
-    : dInput(nullptr), dInputKeyboardDevice(nullptr), dInputMouseDevice(nullptr), hr(S_OK) {
+    : hWnd(nullptr), m_d3dDevice(nullptr), dInput(nullptr),
+      dInputKeyboardDevice(nullptr), dInputMouseDevice(nullptr),
+      m_cursor(nullptr), m_initialized(false),
+      screenWidth(1280), screenHeight(720) {
+
     ZeroMemory(diKeys, sizeof(diKeys));
+    ZeroMemory(prevDiKeys, sizeof(prevDiKeys));
     ZeroMemory(&mouseState, sizeof(mouseState));
+    ZeroMemory(&prevMouseState, sizeof(prevMouseState));
 }
 
 InputManager::~InputManager() {
-    // Cleanup in Quit() method instead
+    Quit();
 }
 
-bool InputManager::Initialize(HWND hWnd) {
-    // Create DirectInput interface
-    hr = DirectInput8Create(GetModuleHandle(nullptr), DIRECTINPUT_VERSION,
-                           IID_IDirectInput8, (void**)&dInput, nullptr);
+bool InputManager::Initialize(HWND hWnd, LPDIRECT3DDEVICE9 d3dDevice, int screenW, int screenH) {
+    this->hWnd = hWnd;
+    this->m_d3dDevice = d3dDevice;
+    this->screenWidth = screenW;
+    this->screenHeight = screenH;
+
+    hr = DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION,
+                          IID_IDirectInput8, (void**)&dInput, NULL);
     if (FAILED(hr)) return false;
 
-    // Initialize keyboard
-    hr = dInput->CreateDevice(GUID_SysKeyboard, &dInputKeyboardDevice, nullptr);
+    // Keyboard
+    hr = dInput->CreateDevice(GUID_SysKeyboard, &dInputKeyboardDevice, NULL);
     if (FAILED(hr)) return false;
+    dInputKeyboardDevice->SetDataFormat(&c_dfDIKeyboard);
+    dInputKeyboardDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+    dInputKeyboardDevice->Acquire();
 
-    hr = dInputKeyboardDevice->SetDataFormat(&c_dfDIKeyboard);
+    // Mouse
+    hr = dInput->CreateDevice(GUID_SysMouse, &dInputMouseDevice, NULL);
     if (FAILED(hr)) return false;
+    dInputMouseDevice->SetDataFormat(&c_dfDIMouse);
+    dInputMouseDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+    dInputMouseDevice->Acquire();
 
-    hr = dInputKeyboardDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-    if (FAILED(hr)) return false;
+    if (m_d3dDevice) {
+        if (!CreateCursor("assets/cursor.png")) {
+            MessageBox(NULL, "Failed to load cursor texture (assets/cursor.png)",
+                       "Error", MB_OK | MB_ICONERROR);
+        }
+    }
 
-    hr = dInputKeyboardDevice->Acquire();
-    if (FAILED(hr)) return false;
+    ShowCursor(FALSE); // hide Windows cursor
 
-    // Initialize mouse
-    hr = dInput->CreateDevice(GUID_SysMouse, &dInputMouseDevice, nullptr);
-    if (FAILED(hr)) return false;
-
-    hr = dInputMouseDevice->SetDataFormat(&c_dfDIMouse);
-    if (FAILED(hr)) return false;
-
-    hr = dInputMouseDevice->SetCooperativeLevel(hWnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-    if (FAILED(hr)) return false;
-
-    hr = dInputMouseDevice->Acquire();
-    if (FAILED(hr)) return false;
-
+    m_initialized = true;
     return true;
 }
 
 void InputManager::Update() {
-    // Update keyboard state
+    memcpy(prevDiKeys, diKeys, sizeof(diKeys));
+    prevMouseState = mouseState;
+
+    // Keyboard state
     hr = dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
     if (FAILED(hr)) {
-        // Try to reacquire if lost focus
         dInputKeyboardDevice->Acquire();
         dInputKeyboardDevice->GetDeviceState(sizeof(diKeys), diKeys);
     }
 
-    // Update mouse state
+    // Mouse state
     hr = dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
     if (FAILED(hr)) {
-        // Try to reacquire if lost focus
         dInputMouseDevice->Acquire();
         dInputMouseDevice->GetDeviceState(sizeof(mouseState), &mouseState);
+    }
+
+    // Update custom cursor with DirectInput deltas
+    if (m_cursor) {
+        m_cursor->UpdateDelta(mouseState.lX, mouseState.lY, screenWidth, screenHeight);
+    }
+}
+
+void InputManager::Render(LPD3DXSPRITE sprite) {
+    if (m_cursor) {
+        m_cursor->Render(sprite);
     }
 }
 
 void InputManager::Quit() {
+    if (m_cursor) {
+        m_cursor->Shutdown();
+        delete m_cursor;
+        m_cursor = nullptr;
+    }
     if (dInputKeyboardDevice) {
         dInputKeyboardDevice->Unacquire();
         dInputKeyboardDevice->Release();
@@ -82,28 +103,8 @@ void InputManager::Quit() {
         dInput->Release();
         dInput = nullptr;
     }
-}
 
-POINT InputManager::GetMousePosition() {
-    POINT mousePos = {0, 0};
-    if (dInputMouseDevice) {
-        DIMOUSESTATE mouseState;
-        if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
-            GetCursorPos(&mousePos);
-            ScreenToClient(hWnd, &mousePos);
-        }
-    }
-    return mousePos;
-}
-
-bool InputManager::IsMouseButtonPressed(int button) {
-    if (dInputMouseDevice && button >= 0 && button < 8) {
-        DIMOUSESTATE mouseState;
-        if (SUCCEEDED(dInputMouseDevice->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState))) {
-            return (mouseState.rgbButtons[button] & 0x80) != 0;
-        }
-    }
-    return false;
+    m_initialized = false;
 }
 
 bool InputManager::IsKeyDown(int dik) const {
@@ -114,14 +115,35 @@ bool InputManager::IsMouseButtonDown(int button) const {
     return (mouseState.rgbButtons[button] & 0x80) != 0;
 }
 
-LONG InputManager::GetMouseX() const {
-    return mouseState.lX;
+bool InputManager::IsMouseButtonPressed(int button) {
+    return ((mouseState.rgbButtons[button] & 0x80) != 0) &&
+           ((prevMouseState.rgbButtons[button] & 0x80) == 0);
 }
 
-LONG InputManager::GetMouseY() const {
-    return mouseState.lY;
+bool InputManager::CreateCursor(const char* texturePath) {
+    if (!m_d3dDevice) return false;
+
+    if (m_cursor) {
+        m_cursor->Shutdown();
+        delete m_cursor;
+    }
+
+    m_cursor = new Cursor();
+    if (!m_cursor->Initialize(m_d3dDevice, texturePath)) {
+        delete m_cursor;
+        m_cursor = nullptr;
+        return false;
+    }
+
+    return true;
 }
 
-LONG InputManager::GetMouseZ() const {
-    return mouseState.lZ;
+void InputManager::SetCursorVisible(bool visible) {
+    if (m_cursor) {
+        m_cursor->SetVisible(visible);
+    }
+}
+
+bool InputManager::IsCursorVisible() const {
+    return m_cursor ? m_cursor->IsVisible() : false;
 }

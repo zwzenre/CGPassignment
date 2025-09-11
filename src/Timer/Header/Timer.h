@@ -4,11 +4,12 @@
 
 class Timer {
 public:
-    void Init(int);
+    void Init(int fps);
     int FramesToUpdate();
     std::string GetTimer();
     void SetTotalTime(int time);
     float GetDeltaTime();
+    float SecondsPerFrame() const;
 
 private:
     LARGE_INTEGER timerFreq;
@@ -17,7 +18,7 @@ private:
     int requestedFPS;
     float intervalsPerFrame;
     float intervalsSinceLastUpdate;
+    float deltaTime;
 
     int totalTime = 0;
-//    float interval = 0;
 };
