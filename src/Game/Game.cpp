@@ -1,6 +1,6 @@
 #include "Header/Game.h"
-#include "../Scene/Header/MainMenuScene.h"  // Add this include
-#include "../Scene/Header/Level1.h"         // Add this include
+#include "../Scene/Header/MainMenuScene.h"
+#include "../Scene/Header/Level1.h"
 #include "../Manager/Header/SoundManager.h"
 #include <iostream>
 
@@ -95,7 +95,6 @@ void Game::Run() {
 
             soundManager.UpdateSound();
 
-            // Handle scene transitions BEFORE updating the scene
             HandleSceneTransitions();
 
             sceneManager.Update(timer.SecondsPerFrame());
@@ -123,23 +122,25 @@ void Game::HandleSceneTransitions() {
     Scene* currentScene = sceneManager.GetCurrentScene();
     if (!currentScene) return;
 
-    // Check if we're in MainMenu and play button was clicked
     MainMenuScene* mainMenu = dynamic_cast<MainMenuScene*>(currentScene);
-    if (mainMenu && mainMenu->IsPlayButtonClicked()) {
-        mainMenu->ResetPlayButton();
-        TransitionToLevel1();
-        return;
+    if (mainMenu) {
+        if (mainMenu->IsPlayButtonClicked()) {
+            mainMenu->ResetPlayButton();
+            TransitionToLevel1();
+            return;
+        }
+
+        if (inputManager.IsKeyDown(DIK_ESCAPE)) {
+            PostQuitMessage(0);
+            return;
+        }
     }
 
-    // Check if we're in Level1 and should return to menu (ESC key)
     Level1* level1 = dynamic_cast<Level1*>(currentScene);
     if (level1 && inputManager.IsKeyDown(DIK_ESCAPE)) {
         TransitionToMainMenu();
         return;
     }
-
-    // Add more transition logic here as needed
-    // if (level1 && level1->IsLevelComplete()) { TransitionToLevel2(); }
 }
 
 void Game::Shutdown() {
@@ -191,13 +192,14 @@ bool Game::CreateGameWindow(HINSTANCE hInstance) {
     }
 
     hWnd = CreateWindow(
-        "GameWindowClass",
-        "Car Racing Game",
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        windowWidth, windowHeight,
-        nullptr, nullptr,
-        hInstance, this
+    "GameWindowClass",
+    "Car Racing Game",
+    WS_POPUP,
+    0, 0,
+    GetSystemMetrics(SM_CXSCREEN),
+    GetSystemMetrics(SM_CYSCREEN),
+    nullptr, nullptr,
+    hInstance, this
     );
 
     if (!hWnd) {
@@ -215,11 +217,11 @@ bool Game::InitializeDirectX() {
     }
 
     D3DPRESENT_PARAMETERS d3dpp = {};
-    d3dpp.Windowed = TRUE;
+    d3dpp.Windowed = FALSE;
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
     d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
-    d3dpp.BackBufferWidth = windowWidth;
-    d3dpp.BackBufferHeight = windowHeight;
+    d3dpp.BackBufferWidth = GetSystemMetrics(SM_CXSCREEN);
+    d3dpp.BackBufferHeight = GetSystemMetrics(SM_CYSCREEN);
     d3dpp.hDeviceWindow = hWnd;
     d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
 
@@ -236,6 +238,7 @@ bool Game::InitializeDirectX() {
     }
 
     d3d->Release();
+    isFullScreen = true;
     return true;
 }
 
@@ -281,7 +284,6 @@ LRESULT CALLBACK Game::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             return 0;
 
         case WM_KEYDOWN:
-            // Remove ESC quit from here since Level1 uses ESC to return to menu
             if (wParam == 'F') {
                 game->ToggleFullscreen();
                 return 0;
