@@ -39,7 +39,7 @@ add_executable(Game main.cpp
         src/Game/Header/Collectible.h
         src/Game/Item.cpp
         src/Game/Header/Item.h
-        #        src/Scene/EndScene.cpp
+#        src/Scene/EndScene.cpp
 #        src/Scene/Header/EndScene.h
 )
 
@@ -74,8 +74,6 @@ target_link_libraries(Game
 )
 
 set(GAME_ASSETS
-        # add asset files here
-        assets/practical9.png
         assets/Mainmenu.png
         assets/Mainmenu2.png
         assets/button_round_depth_line.png
@@ -85,14 +83,14 @@ set(GAME_ASSETS
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png
+        assets/coin.png
+        assets/box.jpg
         assets/btn_pop.wav
         assets/car_drive.wav
         assets/gameplay_bgm.wav
         assets/goal_sound.wav
         assets/main_menu_bgm.wav
         assets/start_countdown.wav
-        assets/box.jpg
-        assets/coin.png
 )
 
 add_custom_command(
