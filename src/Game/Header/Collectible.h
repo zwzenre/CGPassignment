@@ -1,7 +1,7 @@
 #pragma once
 #include "Header/Item.h"
 
-class Collectible : public Items {
+class Collectible : public Item {
 public:
     Collectible(D3DXVECTOR2 position, const char* texturePath);
     ~Collectible() override;
