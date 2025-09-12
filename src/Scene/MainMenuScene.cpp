@@ -15,8 +15,8 @@ MainMenuScene::MainMenuScene() {
     playButtonPressed = false;
     playButtonClicked = false;
 
-    windowWidth = 1280;
-    windowHeight = 720;
+    windowWidth = 1920;
+    windowHeight = 1080;
     hWnd = nullptr;
 }
 
@@ -33,10 +33,8 @@ void MainMenuScene::Init(IDirect3DDevice9* device, InputManager* inputMgr, Sound
     device->GetCreationParameters(&params);
     hWnd = params.hFocusWindow;
 
-    RECT rect;
-    GetClientRect(hWnd, &rect);
-    windowWidth = rect.right - rect.left;
-    windowHeight = rect.bottom - rect.top;
+    windowWidth  = GetSystemMetrics(SM_CXSCREEN);
+    windowHeight = GetSystemMetrics(SM_CYSCREEN);
 
     D3DXCreateTextureFromFile(d3dDevice, "assets/Mainmenu2.png", &menuBackground);
     D3DXCreateTextureFromFile(d3dDevice, "assets/button_round_line.png", &playButtonTex);
@@ -86,7 +84,6 @@ void MainMenuScene::Update(float deltaTime) {
         ScreenToClient(hWnd, &mousePos);
     }
 
-    // Rest of your existing button logic...
     playButtonHovered = (mousePos.x >= playButtonRect.left &&
                          mousePos.x <= playButtonRect.right &&
                          mousePos.y >= playButtonRect.top &&

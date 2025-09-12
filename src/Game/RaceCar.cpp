@@ -5,7 +5,7 @@
 #undef min
 #undef max
 
-RaceCar::RaceCar(D3DXVECTOR2 startPos)
+RaceCar::RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH)
     : position(startPos), velocity(0, 0), rotation(0.0f),
       enginePower(300.0f),
       maxSpeed(400.0f),
@@ -23,12 +23,21 @@ RaceCar::RaceCar(D3DXVECTOR2 startPos)
       frameWidth(64),
       frameHeight(128),
       frameTimer(0.0f),
-      frameDelay(0.08f) {}
+      frameDelay(0.08f),
+      screenWidth(screenW),
+      screenHeight(screenH)
+{
+    scale = D3DXVECTOR2(
+        static_cast<float>(screenWidth) / 1920.0f,
+        static_cast<float>(screenHeight) / 1080.0f
+    );
+}
 
 void RaceCar::Update(float deltaTime, bool forward, bool backward, bool left, bool right) {
     ApplyPhysics(deltaTime, forward, backward, left, right);
     UpdateSteering(deltaTime, left, right);
     UpdateAnimation(deltaTime, left, right);
+    ClampToScreen(); // prevent teleporting
 }
 
 void RaceCar::ApplyPhysics(float deltaTime, bool forward, bool backward, bool left, bool right) {
@@ -151,10 +160,7 @@ void RaceCar::Render(LPD3DXSPRITE spriteBrush, LPDIRECT3DTEXTURE9 texture) {
     D3DXVECTOR2 trans(position.x, position.y);
 
     D3DXMATRIX mat;
-    D3DXVECTOR2 scaling(1.0f, 1.0f);
-    D3DXVECTOR2 pivot(center.x, center.y);
-
-    D3DXMatrixTransformation2D(&mat, nullptr, 0.0f, &scaling, &pivot, rotation, &trans);
+    D3DXMatrixTransformation2D(&mat, nullptr, 0.0f, &scale, &center, rotation, &trans);
 
     spriteBrush->SetTransform(&mat);
     spriteBrush->Draw(texture, &srcRect, nullptr, nullptr, D3DCOLOR_XRGB(255, 255, 255));
@@ -169,7 +175,17 @@ RECT RaceCar::GetBoundingBox() const {
     RECT box;
     box.left   = static_cast<LONG>(position.x);
     box.top    = static_cast<LONG>(position.y);
-    box.right  = static_cast<LONG>(position.x + frameWidth);
-    box.bottom = static_cast<LONG>(position.y + frameHeight);
+    box.right  = static_cast<LONG>(position.x + frameWidth * scale.x);
+    box.bottom = static_cast<LONG>(position.y + frameHeight * scale.y);
     return box;
+}
+
+void RaceCar::ClampToScreen() {
+    float carWidth  = frameWidth * scale.x;
+    float carHeight = frameHeight * scale.y;
+
+    if (position.x < 0) position.x = 0;
+    if (position.y < 0) position.y = 0;
+    if (position.x > screenWidth - carWidth)  position.x = screenWidth - carWidth;
+    if (position.y > screenHeight - carHeight) position.y = screenHeight - carHeight;
 }

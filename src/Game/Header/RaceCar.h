@@ -30,8 +30,13 @@ private:
     float frameTimer;
     float frameDelay;
 
+    // --- Rendering ---
+    D3DXVECTOR2 scale;
+    int screenWidth;
+    int screenHeight;
+
 public:
-    RaceCar(D3DXVECTOR2 startPos);
+    RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH);
 
     // Getters / Setters
     D3DXVECTOR2 GetPosition() const { return position; }
@@ -43,8 +48,8 @@ public:
     D3DXVECTOR2 GetVelocity() const { return velocity; }
     void SetVelocity(const D3DXVECTOR2& vel) { velocity = vel; }
 
-    int GetWidth() const { return frameWidth; }
-    int GetHeight() const { return frameHeight; }
+    int GetWidth() const { return static_cast<int>(frameWidth * scale.x); }
+    int GetHeight() const { return static_cast<int>(frameHeight * scale.y); }
 
     RECT GetBoundingBox() const;
 
@@ -56,4 +61,5 @@ private:
     void ApplyPhysics(float deltaTime, bool moveForward, bool moveBackward, bool turnLeft, bool turnRight);
     void UpdateSteering(float deltaTime, bool turnLeft, bool turnRight);
     void UpdateAnimation(float deltaTime, bool turnLeft, bool turnRight);
+    void ClampToScreen();
 };

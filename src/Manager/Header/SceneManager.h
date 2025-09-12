@@ -9,7 +9,6 @@ public:
     SceneManager();
     ~SceneManager();
 
-    // Updated ChangeScene signature
     void ChangeScene(Scene* newScene, IDirect3DDevice9* device, InputManager* inputMgr,
                     SoundManager* soundMgr, HWND hWnd = nullptr,
                     int screenWidth = 1280, int screenHeight = 720);
