@@ -1,9 +1,11 @@
 #pragma once
+#include "Scene.h"
 #include "../../Manager/Header/InputManager.h"
 #include "../../Manager/Header/SoundManager.h"
-#include "../../Scene/Header/Scene.h"
 #include "../../Game/Header/RaceCar.h"
-#include <d3dx9.h>
+#include "../../Game/Header/Collectible.h"
+#include "../../Game/Header/Obstacle.h"
+#include <vector>
 
 class Level1 : public Scene {
 public:
@@ -33,6 +35,13 @@ private:
 
     bool goToEndScene;
 
+    std::vector<Collectible*> collectibles;
+    std::vector<Obstacle*> obstacles;
+
     void CreateFont();
     void CleanupFont();
+
+    void CheckCollisions();
+    void HandleCollectibleCollision(Collectible* collectible);
+    void HandleObstacleCollision(Obstacle* obstacle);
 };
