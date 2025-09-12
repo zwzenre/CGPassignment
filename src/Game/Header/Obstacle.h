@@ -11,6 +11,8 @@ public:
     void Render(LPD3DXSPRITE spriteBrush) override;
 
     RECT GetBoundingBox() { return Item::GetBoundingBox(); }
+    D3DXVECTOR2 GetPosition() const { return Item::GetPosition(); }
+    D3DXVECTOR2 GetSize() const { return Item::GetSize(); }
 
     void OnCollision(class RaceCar* car) override;
 
