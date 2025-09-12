@@ -32,11 +32,12 @@ add_executable(Game main.cpp
         src/Scene/SelectStageScene.cpp
         src/Scene/Header/SelectStageScene.h
         src/Scene/Header/Scene.h
-        src/Game/Mainmenu.cpp
-        src/Game/Header/Mainmenu.h
         src/Scene/MainMenuScene.cpp
         src/Game/Cursor.cpp
-        src/Game/Header/Cursor.h)
+        src/Game/Header/Cursor.h
+        src/Scene/EndScene.cpp
+        src/Scene/Header/EndScene.h
+)
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
 # set_property(TARGET Game PROPERTY WIN32_EXECUTABLE TRUE)
@@ -75,6 +76,8 @@ set(GAME_ASSETS
         assets/Mainmenu2.png
         assets/button_round_depth_line.png
         assets/button_square_line.png
+        assets/resultScreen.png
+        assets/EndBg.png
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png

@@ -2,6 +2,7 @@
 #include "../Scene/Header/MainMenuScene.h"
 #include "../Scene/Header/Level1.h"
 #include "../Manager/Header/SoundManager.h"
+#include "../Scene//Header/EndScene.h"
 #include <iostream>
 
 #pragma comment(lib, "d3d9.lib")
@@ -62,7 +63,7 @@ void Game::TransitionToLevel1() {
     Level1* level1Scene = new Level1();
     sceneManager.ChangeScene(level1Scene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
     soundManager.PlayGameplayBgm();
-    std::cout << "Transitioned to Level 1!" << std::endl;
+    std::cout << "Transitioned to Level 1" << std::endl;
 }
 
 void Game::TransitionToMainMenu() {
@@ -71,6 +72,13 @@ void Game::TransitionToMainMenu() {
     MainMenuScene* mainMenu = new MainMenuScene();
     sceneManager.ChangeScene(mainMenu, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
     std::cout << "Returned to Main Menu" << std::endl;
+}
+
+void Game::TransitionToEndScene() {
+    soundManager.StopBackgroundMusic();
+    EndScene* endScene = new EndScene();
+    sceneManager.ChangeScene(endScene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    std::cout << "Transitioned to End Scene!" << std::endl;
 }
 
 bool Game::WindowIsRunning() {
@@ -100,7 +108,6 @@ void Game::Run() {
             sceneManager.Update(timer.SecondsPerFrame());
         }
 
-        // Render frame
         d3dDevice->Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
         if (SUCCEEDED(d3dDevice->BeginScene())) {
@@ -122,24 +129,38 @@ void Game::HandleSceneTransitions() {
     Scene* currentScene = sceneManager.GetCurrentScene();
     if (!currentScene) return;
 
-    MainMenuScene* mainMenu = dynamic_cast<MainMenuScene*>(currentScene);
-    if (mainMenu) {
+    // Main Menu
+    if (auto mainMenu = dynamic_cast<MainMenuScene*>(currentScene)) {
         if (mainMenu->IsPlayButtonClicked()) {
             mainMenu->ResetPlayButton();
             TransitionToLevel1();
             return;
         }
-
         if (inputManager.IsKeyDown(DIK_ESCAPE)) {
             PostQuitMessage(0);
             return;
         }
     }
 
-    Level1* level1 = dynamic_cast<Level1*>(currentScene);
-    if (level1 && inputManager.IsKeyDown(DIK_ESCAPE)) {
-        TransitionToMainMenu();
-        return;
+    // Level1
+    if (auto level1 = dynamic_cast<Level1*>(currentScene)) {
+        if (inputManager.IsKeyDown(DIK_ESCAPE)) {
+            TransitionToMainMenu();
+            return;
+        }
+        if (level1->WantsToGoToEndScene()) {
+            level1->ResetEndSceneRequest();
+            TransitionToEndScene();
+            return;
+        }
+    }
+
+    // End Scene
+    if (auto endScene = dynamic_cast<EndScene*>(currentScene)) {
+        if (endScene->IsExitSelected()) {
+            PostQuitMessage(0);
+            return;
+        }
     }
 }
 

@@ -28,6 +28,6 @@ private:
     D3DXVECTOR2 scale;
     bool visible;
 
-    int texWidth;
-    int texHeight;
+    int textureWidth;
+    int textureHeight;
 };

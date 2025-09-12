@@ -7,14 +7,16 @@
 Level1::Level1()
     : device(nullptr), carTexture(nullptr),
       input(nullptr), sound(nullptr), playerCar(nullptr),
-      gameCursor(nullptr), fontBrush(nullptr), screenWidth(1280), screenHeight(720) {}
+      gameCursor(nullptr), fontBrush(nullptr),
+      screenWidth(1920), screenHeight(1080),
+      goToEndScene(false) {}
 
 Level1::~Level1() {
     Quit();
 }
 
 void Level1::Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager* soundMgr,
-                 HWND hWnd, int screenWidth, int screenHeight) {
+                  HWND hWnd, int screenWidth, int screenHeight) {
     this->device = device;
     this->input = inputMgr;
     this->sound = soundMgr;
@@ -27,11 +29,9 @@ void Level1::Init(IDirect3DDevice9* device, InputManager* inputMgr, SoundManager
         MessageBox(nullptr, "Failed to load car.png", "Error", MB_OK);
     }
 
-    // Initialize game objects
-    playerCar = new RaceCar(D3DXVECTOR2(screenWidth / 2, screenHeight / 2));
+    playerCar = new RaceCar(D3DXVECTOR2(100, 100), screenWidth, screenHeight);
 
-    // Use the cursor from InputManager instead of creating our own
-    gameCursor = input->GetCursor();  // Get the existing cursor from InputManager
+    gameCursor = input->GetCursor();
 
     CreateFont();
 }
@@ -40,6 +40,7 @@ void Level1::Update(float deltaTime) {
     if (!input || !playerCar) return;
 
     input->SetCursorVisible(true);
+
     // Get input for both WASD and Arrow keys
     bool moveForward = input->IsKeyDown(DIK_UP) || input->IsKeyDown(DIK_W);
     bool moveBackward = input->IsKeyDown(DIK_DOWN) || input->IsKeyDown(DIK_S);
@@ -48,18 +49,13 @@ void Level1::Update(float deltaTime) {
 
     playerCar->Update(deltaTime, moveForward, moveBackward, turnLeft, turnRight);
 
-    D3DXVECTOR2 pos = playerCar->GetPosition();
-    if (pos.x < 0) pos.x = screenWidth;
-    if (pos.x > screenWidth) pos.x = 0;
-    if (pos.y < 0) pos.y = screenHeight;
-    if (pos.y > screenHeight) pos.y = 0;
-    playerCar->SetPosition(pos);
+    if (input->IsKeyDown(DIK_RETURN)) {
+        goToEndScene = true;
+    }
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
     if (!carTexture || !playerCar) return;
-
-    // Render the race car
     playerCar->Render(sprite, carTexture);
 }
 
@@ -82,8 +78,8 @@ void Level1::Quit() {
 void Level1::CreateFont() {
     if (device) {
         D3DXCreateFont(device, 18, 0, FW_BOLD, 1, false,
-                      DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY,
-                      DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
+                       DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY,
+                       DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
     }
 }
 

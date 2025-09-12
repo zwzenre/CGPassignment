@@ -19,8 +19,8 @@ private:
     SceneManager sceneManager;
 
     bool isRunning;
-    const int windowWidth = 1280;
-    const int windowHeight = 720;
+    const int windowWidth = 1920;
+    const int windowHeight = 1080;
 
 public:
     Game(HINSTANCE hInstance);
@@ -34,6 +34,7 @@ public:
     // Scene transition methods
     void InitializeMainMenu();
     void TransitionToLevel1();
+    void TransitionToEndScene();
     void TransitionToMainMenu();
     void HandleSceneTransitions();
 

@@ -6,7 +6,7 @@ Cursor::Cursor()
       position(400.0f, 300.0f),  // Start at center-ish
       scale(0.25f, 0.25f),
       visible(true),
-      texWidth(0), texHeight(0) {}
+      textureWidth(0), textureHeight(0) {}
 
 Cursor::~Cursor() {
     Shutdown();
@@ -26,8 +26,8 @@ bool Cursor::Initialize(LPDIRECT3DDEVICE9 device, const char* texturePath) {
         return false;
     }
 
-    texWidth = info.Width;
-    texHeight = info.Height;
+    textureWidth = info.Width;
+    textureHeight = info.Height;
 
     // Set initial position to center of screen (will be updated by InputManager)
     RECT rect;
@@ -47,15 +47,13 @@ void Cursor::Shutdown() {
 }
 
 void Cursor::UpdateDelta(LONG dx, LONG dy, int screenW, int screenH) {
-    // Apply movement delta
     position.x += static_cast<float>(dx);
     position.y += static_cast<float>(dy);
 
-    // Calculate actual cursor size after scaling
-    float cursorWidth = texWidth * scale.x;
-    float cursorHeight = texHeight * scale.y;
+    float cursorWidth  = textureWidth * scale.x;
+    float cursorHeight = textureHeight * scale.y;
 
-    // Clamp to screen boundaries
+    // Clamp to screen
     if (position.x < 0) position.x = 0;
     if (position.y < 0) position.y = 0;
     if (position.x > screenW - cursorWidth) position.x = screenW - cursorWidth;
