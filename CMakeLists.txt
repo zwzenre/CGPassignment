@@ -78,6 +78,12 @@ set(GAME_ASSETS
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png
+        assets/btn_pop.wav
+        assets/car_drive.wav
+        assets/gameplay_bgm.wav
+        assets/goal_sound.wav
+        assets/main_menu_bgm.wav
+        assets/start_countdown.wav
 )
 
 add_custom_command(
