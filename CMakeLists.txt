@@ -35,8 +35,12 @@ add_executable(Game main.cpp
         src/Scene/MainMenuScene.cpp
         src/Game/Cursor.cpp
         src/Game/Header/Cursor.h
-        src/Scene/EndScene.cpp
-        src/Scene/Header/EndScene.h
+        src/Game/Collectible.cpp
+        src/Game/Header/Collectible.h
+        src/Game/Item.cpp
+        src/Game/Header/Item.h
+        #        src/Scene/EndScene.cpp
+#        src/Scene/Header/EndScene.h
 )
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
@@ -87,6 +91,8 @@ set(GAME_ASSETS
         assets/goal_sound.wav
         assets/main_menu_bgm.wav
         assets/start_countdown.wav
+        assets/box.jpg
+        assets/coin.png
 )
 
 add_custom_command(
