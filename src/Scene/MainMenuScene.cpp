@@ -1,4 +1,5 @@
 #include "../Scene/Header/MainMenuScene.h"
+#include "../Manager/Header/SoundManager.h"
 #include <iostream>
 
 MainMenuScene::MainMenuScene() {
@@ -57,6 +58,8 @@ void MainMenuScene::Init(IDirect3DDevice9* device, InputManager* inputMgr, Sound
 
     CreateFontInterface();
     CreateTitleFont();
+
+    soundMgr->PlayMainMenuBgm();
 }
 
 void MainMenuScene::Update(float deltaTime) {

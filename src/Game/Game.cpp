@@ -1,6 +1,7 @@
 #include "Header/Game.h"
 #include "../Scene/Header/MainMenuScene.h"  // Add this include
 #include "../Scene/Header/Level1.h"         // Add this include
+#include "../Manager/Header/SoundManager.h"
 #include <iostream>
 
 #pragma comment(lib, "d3d9.lib")
@@ -30,6 +31,8 @@ bool Game::Initialize() {
         return false;
     }
 
+    soundManager.InitializeAudio();
+
     // Initialize timer
     timer.Init(60);
 
@@ -55,12 +58,16 @@ void Game::InitializeMainMenu() {
 }
 
 void Game::TransitionToLevel1() {
+    soundManager.StopBackgroundMusic();
     Level1* level1Scene = new Level1();
     sceneManager.ChangeScene(level1Scene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    soundManager.PlayGameplayBgm();
     std::cout << "Transitioned to Level 1!" << std::endl;
 }
 
 void Game::TransitionToMainMenu() {
+    soundManager.StopBackgroundMusic();
+    soundManager.UpdateSound();
     MainMenuScene* mainMenu = new MainMenuScene();
     sceneManager.ChangeScene(mainMenu, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
     std::cout << "Returned to Main Menu" << std::endl;
@@ -85,6 +92,8 @@ void Game::Run() {
         int framesToUpdate = timer.FramesToUpdate();
         for (int i = 0; i < framesToUpdate; ++i) {
             inputManager.Update();
+
+            soundManager.UpdateSound();
 
             // Handle scene transitions BEFORE updating the scene
             HandleSceneTransitions();
