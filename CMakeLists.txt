@@ -35,6 +35,10 @@ add_executable(Game main.cpp
         src/Scene/MainMenuScene.cpp
         src/Game/Cursor.cpp
         src/Game/Header/Cursor.h
+        src/Game/Collectible.cpp
+        src/Game/Header/Collectible.h
+        src/Game/Item.cpp
+        src/Game/Header/Item.h
         src/Scene/EndScene.cpp
         src/Scene/Header/EndScene.h
 )
@@ -70,8 +74,6 @@ target_link_libraries(Game
 )
 
 set(GAME_ASSETS
-        # add asset files here
-        assets/practical9.png
         assets/Mainmenu.png
         assets/Mainmenu2.png
         assets/button_round_depth_line.png
@@ -81,6 +83,8 @@ set(GAME_ASSETS
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png
+        assets/coin.png
+        assets/box.jpg
         assets/btn_pop.wav
         assets/car_drive.wav
         assets/gameplay_bgm.wav

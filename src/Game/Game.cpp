@@ -2,7 +2,7 @@
 #include "../Scene/Header/MainMenuScene.h"
 #include "../Scene/Header/Level1.h"
 #include "../Manager/Header/SoundManager.h"
-#include "../Scene//Header/EndScene.h"
+#include "../Scene/Header/EndScene.h"
 #include <iostream>
 
 #pragma comment(lib, "d3d9.lib")

@@ -10,6 +10,9 @@ public:
     void SetTotalTime(int time);
     float GetDeltaTime();
     float SecondsPerFrame() const;
+    void Start();
+    void Stop();
+    float GetElapsedTime() const;
 
 private:
     LARGE_INTEGER timerFreq;
@@ -20,5 +23,8 @@ private:
     float intervalsSinceLastUpdate;
     float deltaTime;
 
+    LARGE_INTEGER startTime;
+    LARGE_INTEGER stopTime;
+    bool running = false;
     int totalTime = 0;
 };
