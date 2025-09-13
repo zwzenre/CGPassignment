@@ -83,6 +83,8 @@ set(GAME_ASSETS
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png
+        assets/exitBtn.png
+        assets/restartBtn.png
         assets/coin.png
         assets/box.jpg
         assets/btn_pop.wav
@@ -91,8 +93,8 @@ set(GAME_ASSETS
         assets/goal_sound.wav
         assets/main_menu_bgm.wav
         assets/start_countdown.wav
-        assets/exitBtn.png
-        assets/restartBtn.png
+        assets/coin.wav
+        assets/box.mp3
 )
 
 add_custom_command(
