@@ -45,19 +45,17 @@ void Obstacle::Update(float deltaTime) {
             break;
         }
         case Disappearing: {
-            disappearTimer += deltaTime;
-            if (disappearTimer >= disappearDuration) {
-                // Obstacle should be "removed" by the scene manager after this state
-                // For now, we'll keep it invisible.
-                // In Level1, you would check IsDisappearing() and mark for removal.
-            }
+            // Obstacle remains invisible. Level1 will handle actual deletion.
+//            disappearTimer += deltaTime;
+//            if (disappearTimer >= disappearDuration) {
+//            }
             break;
         }
     }
 }
 
 void Obstacle::Render(LPD3DXSPRITE spriteBrush) {
-    if (!texture || !spriteBrush || (state == Disappearing && !currentlyVisible)) return;
+    if (!texture || !spriteBrush || !currentlyVisible) return;
 
     D3DSURFACE_DESC desc;
     texture->GetLevelDesc(0, &desc);

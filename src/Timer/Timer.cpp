@@ -37,10 +37,12 @@ int Timer::FramesToUpdate() {
 }
 
 std::string Timer::GetTimer() {
-    float elapsed = running ? GetElapsedTime() : (float)(stopTime.QuadPart - startTime.QuadPart) / timerFreq.QuadPart;
+    float elapsed = GetElapsedTime();
+    elapsed = (((0.0f) > (elapsed)) ? (0.0f) : (elapsed));
 
-    int minutes = static_cast<int>(elapsed / 60);
-    int seconds = static_cast<int>(elapsed) % 60;
+    int totalSeconds = static_cast<int>(elapsed);
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
 
     std::stringstream ss;
     ss << std::setfill('0') << std::setw(2) << minutes << ":"

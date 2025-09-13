@@ -16,12 +16,14 @@ void PhysicsManager::ConstrainToBounds(RaceCar& car) {
     car.SetPosition(pos);
 }
 
-void PhysicsManager::CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles) {
+bool PhysicsManager::CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles) {
     for (Obstacle* obstacle : obstacles) {
-        if (!obstacle->IsDisappearing()) {
+        if (!obstacle->IsDisappearing() && !obstacle->IsCollided()) {
             if (car.CarRectCollision(obstacle->GetBoundingBox())) {
                 obstacle->OnCollision(&car);
+                return true;
             }
         }
     }
+    return false;
 }

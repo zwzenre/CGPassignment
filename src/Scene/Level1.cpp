@@ -113,9 +113,6 @@ void Level1::Update(float deltaTime) {
 
     if (goToEndScene && levelTimer.IsRunning()) {
         levelTimer.Stop();
-        // The Game class will handle the actual transition and passing of data
-        // call Game::TransitionToEndScene(...)
-        // Since Level1 doesn't have a direct pointer to Game, the Game::HandleSceneTransitions will pick up the 'goToEndScene' flag.
     }
 }
 
@@ -189,26 +186,30 @@ void Level1::CleanupFont() {
 void Level1::CheckCollectibleCollisions() {
     if (!playerCar) return;
 
-    std::vector<Collectible *> toRemove;
+    std::vector<Collectible*> collectedThisFrame;
 
     for (Collectible *collectible: collectibles) {
         if (!collectible->IsCollected()) {
             if (playerCar->CarRectCollision(collectible->GetBoundingBox())) {
                 HandleCollectibleCollision(collectible);
-                toRemove.push_back(collectible);
+                collectedThisFrame.push_back(collectible);
             }
         }
     }
 
-    for (Collectible *collectedItem: toRemove) {
+    for (Collectible* collectedItem : collectedThisFrame) {
         collectibles.erase(std::remove(collectibles.begin(), collectibles.end(), collectedItem), collectibles.end());
+        delete collectedItem;
     }
 }
 
 void Level1::CheckObstacleCollisions() {
     if (!playerCar) return;
 
-    physicsManager.CheckCarObstacleCollisions(*playerCar, obstacles);
+    if (physicsManager.CheckCarObstacleCollisions(*playerCar, obstacles)) {
+        sound->PlayBoxSound(0.0f);
+        collisionCount++;
+    }
 
     obstacles.erase(
             std::remove_if(obstacles.begin(), obstacles.end(), [](Obstacle *o) {
@@ -233,16 +234,16 @@ void Level1::DrawUI(LPD3DXSPRITE sprite) {
     if (!timerFont || !fontBrush) return;
 
     std::string timerText = "Time: " + levelTimer.GetTimer();
-    RECT timerRect = {screenWidth - 300, 10, screenWidth - 10, 50};
+    RECT timerRect = {screenWidth - 350, 20, screenWidth - 20, 100};
     timerFont->DrawTextA(sprite, timerText.c_str(), -1, &timerRect, DT_RIGHT | DT_VCENTER, D3DCOLOR_XRGB(255, 255, 0));
 
     std::stringstream ssCoins;
     ssCoins << "Coins: " << collectedCoinCount << "/" << TOTAL_COINS_FOR_STAR;
-    RECT coinsRect = {10, 10, 200, 50};
+    RECT coinsRect = {20, 20, 250, 100};
     fontBrush->DrawTextA(sprite, ssCoins.str().c_str(), -1, &coinsRect, DT_LEFT | DT_VCENTER, D3DCOLOR_XRGB(0, 255, 0));
 
     std::stringstream ssCollisions;
     ssCollisions << "Collisions: " << collisionCount;
-    RECT collisionsRect = {10, 50, 200, 90};
+    RECT collisionsRect = {20, 100, 250, 180};
     fontBrush->DrawTextA(sprite, ssCollisions.str().c_str(), -1, &collisionsRect, DT_LEFT | DT_VCENTER, D3DCOLOR_XRGB(255, 100, 0));
 }

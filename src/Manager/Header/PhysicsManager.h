@@ -16,5 +16,5 @@ public:
     void ConstrainToBounds(RaceCar& car);
 
     // Checks car collision with a list of obstacles
-    void CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles);
+    bool CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles);
 };

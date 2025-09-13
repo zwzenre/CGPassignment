@@ -15,10 +15,10 @@ public:
     D3DXVECTOR2 GetSize() const { return Item::GetSize(); }
 
     void OnCollision(class RaceCar* car) override;
-
-    // New: State management for collision
     void TriggerCollisionEffect(const D3DXVECTOR2& impactDirection);
+
     bool IsDisappearing() const { return state == Disappearing; }
+    bool IsGliding() const { return state == Gliding; }
     bool IsCollided() const { return state != Stationary; }
 
 private:

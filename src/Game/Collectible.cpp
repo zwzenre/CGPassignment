@@ -2,7 +2,7 @@
 
 Collectible::Collectible(D3DXVECTOR2 position, const char* texturePath)
         : Item(position, D3DXVECTOR2(32, 32), texturePath), collected(false),
-          currentFrame(0), frameWidth(16), frameHeight(16),
+          currentFrame(0), frameWidth(17), frameHeight(17),
           frameTimer(0.0f), frameDelay(0.1f), maxFrames(7) {}
 
 Collectible::~Collectible() = default;
@@ -30,12 +30,22 @@ void Collectible::Render(LPD3DXSPRITE spriteBrush) {
     srcRect.right = srcRect.left + frameWidth;
     srcRect.bottom = srcRect.top + frameHeight;
 
+    D3DXVECTOR2 coinTextureSize((float)frameWidth, (float)frameHeight);
+    D3DXVECTOR2 scaleVec(size.x / coinTextureSize.x, size.y / coinTextureSize.y);
+
     D3DXMATRIX mat;
-    D3DXMatrixTranslation(&mat, position.x, position.y, 0.0f);
+    D3DXMatrixTransformation2D(
+            &mat,
+            nullptr,
+            0.0f,
+            &scaleVec,
+            nullptr,
+            0.0f,
+            &position
+    );
     spriteBrush->SetTransform(&mat);
 
-    D3DXVECTOR3 drawPos(0.0f, 0.0f, 0.0f);
-    spriteBrush->Draw(texture, NULL, NULL, &drawPos, D3DCOLOR_XRGB(255, 255, 255));
+    spriteBrush->Draw(texture, &srcRect, NULL, NULL, D3DCOLOR_XRGB(255, 255, 255));
 
     D3DXMATRIX identity;
     D3DXMatrixIdentity(&identity);
