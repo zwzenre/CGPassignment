@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "../../Manager/Header/InputManager.h"
 #include "../../Manager/Header/SoundManager.h"
+#include "../../Manager/Header/PhysicsManager.h"
 #include "../../Timer/Header/Timer.h"
 #include "../../Game/Header/RaceCar.h"
 #include "../../Game/Header/Collectible.h"
@@ -41,6 +42,8 @@ private:
     std::vector<Obstacle*> obstacles;
 
     Timer levelTimer;
+    PhysicsManager physicsManager;
+
     int collectedCoinCount;
     int collisionCount;
 
@@ -51,8 +54,8 @@ private:
     void CreateFont();
     void CleanupFont();
 
-    void CheckCollisions();
+    void CheckCollectibleCollisions();
+    void CheckObstacleCollisions();
     void HandleCollectibleCollision(Collectible* collectible);
-    void HandleObstacleCollision(Obstacle* obstacle);
     void DrawUI(LPD3DXSPRITE sprite);
 };

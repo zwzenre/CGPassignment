@@ -10,8 +10,8 @@ public:
 
     // Store Sound File
     FMOD::Sound * sound2,
-    * mainMenuBgm, * buttonSound, * gameplayBgm, * carSound, * hitSound, * startCountdownSound, * goalSound;
-    //main menu bgm, button sound effect, car drive, car hit box, start race, goal
+    * mainMenuBgm, * buttonSound, * gameplayBgm, * carSound, * hitSound, * startCountdownSound, * goalSound,
+    * coinSound, * boxSound;
 
     FMOD::Channel * channel = 0; // Buffer
     FMOD_RESULT result; // HRESULT
@@ -26,6 +26,8 @@ public:
     void PlayGoalSound(float pitch, float pan);
     void PlayButtonSound(float pitch, float pan);
     void PlaySoundTrack();
+    void PlayCoinSound(float pan);
+    void PlayBoxSound(float pan);
     void LoadSounds();
     void UpdateSound();
     void cleanup();

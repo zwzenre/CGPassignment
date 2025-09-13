@@ -1,8 +1,7 @@
 #pragma once
 #include "../../Game/Header/RaceCar.h"
-
-#ifndef GAME_PHYSICSMANAGER_H
-#define GAME_PHYSICSMANAGER_H
+#include "../../Game/Header/Obstacle.h"
+#include <vector>
 
 class PhysicsManager {
 private:
@@ -16,8 +15,6 @@ public:
     // Keep car inside screen bounds
     void ConstrainToBounds(RaceCar& car);
 
-    // Placeholder for future obstacle collisions
-    void CheckCarObstacleCollision(RaceCar& car);
+    // Checks car collision with a list of obstacles
+    void CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles);
 };
-
-#endif

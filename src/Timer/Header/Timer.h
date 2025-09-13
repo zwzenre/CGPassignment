@@ -7,12 +7,12 @@ public:
     void Init(int fps);
     int FramesToUpdate();
     std::string GetTimer();
-    void SetTotalTime(int time);
     float GetDeltaTime();
     float SecondsPerFrame() const;
     void Start();
     void Stop();
     float GetElapsedTime() const;
+    bool IsRunning() const { return running; }
 
 private:
     LARGE_INTEGER timerFreq;
@@ -25,6 +25,5 @@ private:
 
     LARGE_INTEGER startTime;
     LARGE_INTEGER stopTime;
-    bool running = false;
-    int totalTime = 0;
+    bool running;
 };

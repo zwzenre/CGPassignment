@@ -1,6 +1,8 @@
 #include "Header/Timer.h"
 #include <iostream>
 #include <profileapi.h>
+#include <iomanip>
+#include <sstream>
 
 void Timer::Init(int fps) {
     QueryPerformanceFrequency(&timerFreq);
@@ -9,9 +11,10 @@ void Timer::Init(int fps) {
 
     requestedFPS = fps;
     intervalsPerFrame = (float)(timerFreq.QuadPart / requestedFPS);
-    totalTime = 0.0f;
     deltaTime = 0.0f;
     running = false;
+    startTime.QuadPart = 0;
+    stopTime.QuadPart = 0;
 }
 
 int Timer::FramesToUpdate() {
@@ -27,10 +30,7 @@ int Timer::FramesToUpdate() {
     }
 
     if (framesToUpdate != 0) {
-        timePrevious = timeNow;
-        if (running) {
-            totalTime += deltaTime;
-        }
+        timePrevious.QuadPart += (LONGLONG)(framesToUpdate * intervalsPerFrame);
     }
 
     return framesToUpdate;
@@ -42,14 +42,11 @@ std::string Timer::GetTimer() {
     int minutes = static_cast<int>(elapsed / 60);
     int seconds = static_cast<int>(elapsed) % 60;
 
-    std::string minStr = (minutes < 10) ? "0" + std::to_string(minutes) : std::to_string(minutes);
-    std::string secStr = (seconds < 10) ? "0" + std::to_string(seconds) : std::to_string(seconds);
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(2) << minutes << ":"
+       << std::setfill('0') << std::setw(2) << seconds;
 
-    return minStr + ":" + secStr;
-}
-
-void Timer::SetTotalTime(int time) {
-    totalTime = time;
+    return ss.str();
 }
 
 float Timer::GetDeltaTime() {
@@ -76,6 +73,8 @@ void Timer::Stop() {
 }
 
 float Timer::GetElapsedTime() const {
+    if (startTime.QuadPart == 0) return 0.0f;
+
     if (running) {
         LARGE_INTEGER currentTime;
         QueryPerformanceCounter(&currentTime);

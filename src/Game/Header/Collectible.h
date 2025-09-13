@@ -17,4 +17,11 @@ public:
 
 private:
     bool collected;
+
+    int currentFrame;
+    int frameWidth;
+    int frameHeight;
+    float frameTimer;
+    float frameDelay;
+    int maxFrames;
 };

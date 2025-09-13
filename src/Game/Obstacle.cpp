@@ -1,5 +1,4 @@
 #include "Header/Obstacle.h"
-#include "../Game/Header/RaceCar.h"
 #include <algorithm>
 
 Obstacle::Obstacle(D3DXVECTOR2 position, D3DXVECTOR2 size, const char* texturePath)
@@ -18,7 +17,7 @@ bool Obstacle::Initialize(IDirect3DDevice9* device) {
 void Obstacle::Update(float deltaTime) {
     switch (state) {
         case Stationary:
-            // Do nothing, obstacle is stationary
+            // Do nothing, obstacle/box is stationary
             break;
         case Gliding: {
             position += glideDirection * glideSpeed * deltaTime;
@@ -60,10 +59,6 @@ void Obstacle::Update(float deltaTime) {
 void Obstacle::Render(LPD3DXSPRITE spriteBrush) {
     if (!texture || !spriteBrush || (state == Disappearing && !currentlyVisible)) return;
 
-    if (state == Blinking && !currentlyVisible) {
-        return;
-    }
-
     D3DSURFACE_DESC desc;
     texture->GetLevelDesc(0, &desc);
     D3DXVECTOR2 textureSize((float)desc.Width, (float)desc.Height);
@@ -102,7 +97,9 @@ void Obstacle::OnCollision(RaceCar* car) {
 }
 
 void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection) {
-    state = Gliding;
-    glideTimer = 0.0f;
-    glideDirection = impactDirection;
+    if (state == Stationary) {
+        state = Gliding;
+        glideTimer = 0.0f;
+        glideDirection = impactDirection;
+    }
 }

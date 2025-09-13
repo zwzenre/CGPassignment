@@ -10,6 +10,8 @@ SoundManager::SoundManager() {
     hitSound = nullptr;
     startCountdownSound = nullptr;
     goalSound = nullptr;
+    coinSound = nullptr;
+    boxSound = nullptr;
     channel = nullptr;
     extradriverdata = nullptr;
 }
@@ -27,6 +29,8 @@ void SoundManager::cleanup() {
     if (startCountdownSound) startCountdownSound->release();
     if (goalSound) goalSound->release();
     if (sound2) sound2->release();
+    if (coinSound) coinSound->release();
+    if (boxSound) boxSound->release();
     if (system) {
         system->close();
         system->release();
@@ -85,6 +89,16 @@ void SoundManager::PlayButtonSound(float pitch, float pan) {
     channel->setPan(pan);
 }
 
+void SoundManager::PlayCoinSound(float pan) {
+    result = system->playSound(coinSound, 0, false, &channel);
+    channel->setPan(pan);
+}
+
+void SoundManager::PlayBoxSound(float pan) {
+    result = system->playSound(boxSound, 0, false, &channel);
+    channel->setPan(pan);
+}
+
 void SoundManager::PlaySoundTrack() {
     result = system->playSound(sound2, 0, false, &channel);
 }
@@ -112,6 +126,12 @@ void SoundManager::LoadSounds() {
     result = carSound->setMode(FMOD_LOOP_OFF);
 
     result = system->createSound("assets/btn_pop.wav", FMOD_DEFAULT, 0, &buttonSound);
+    result = buttonSound->setMode(FMOD_LOOP_OFF);
+
+    result = system->createSound("assets/coin.wav", FMOD_DEFAULT, 0, &coinSound);
+    result = buttonSound->setMode(FMOD_LOOP_OFF);
+
+    result = system->createSound("assets/box.mp3", FMOD_DEFAULT, 0, &boxSound);
     result = buttonSound->setMode(FMOD_LOOP_OFF);
 }
 

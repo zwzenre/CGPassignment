@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <d3dx9.h>
 #include <sstream>
+#include <algorithm>
 
 Level1::Level1()
         : device(nullptr), carTexture(nullptr),
@@ -12,6 +13,7 @@ Level1::Level1()
           gameCursor(nullptr), fontBrush(nullptr),
           screenWidth(1920), screenHeight(1080),
           goToEndScene(false),
+          physicsManager(screenWidth, screenHeight),
           collectedCoinCount(0), collisionCount(0) {}
 
 Level1::~Level1() {
@@ -43,6 +45,12 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
     collectibles.push_back(new Collectible(D3DXVECTOR2(800, 300), "assets/coin.png"));
     collectibles.push_back(new Collectible(D3DXVECTOR2(400, 500), "assets/coin.png"));
     collectibles.push_back(new Collectible(D3DXVECTOR2(100, 700), "assets/coin.png"));
+    collectibles.push_back(new Collectible(D3DXVECTOR2(1200, 250), "assets/coin.png"));
+    collectibles.push_back(new Collectible(D3DXVECTOR2(1500, 400), "assets/coin.png"));
+    collectibles.push_back(new Collectible(D3DXVECTOR2(1700, 100), "assets/coin.png"));
+    collectibles.push_back(new Collectible(D3DXVECTOR2(1300, 700), "assets/coin.png"));
+    collectibles.push_back(new Collectible(D3DXVECTOR2(900, 900), "assets/coin.png"));
+
     for (auto &collectible : collectibles) {
         collectible->Initialize(device);
     }
@@ -52,6 +60,7 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
     obstacles.push_back(new Obstacle(D3DXVECTOR2(150, 550), D3DXVECTOR2(64, 64), "assets/box.jpg"));
     obstacles.push_back(new Obstacle(D3DXVECTOR2(900, 600), D3DXVECTOR2(64, 64), "assets/box.jpg"));
     obstacles.push_back(new Obstacle(D3DXVECTOR2(600, 800), D3DXVECTOR2(64, 64), "assets/box.jpg"));
+
     for (auto &obstacle : obstacles) {
         obstacle->Initialize(device);
     }
@@ -71,6 +80,7 @@ void Level1::Update(float deltaTime) {
     bool turnRight = input->IsKeyDown(DIK_RIGHT) || input->IsKeyDown(DIK_D);
 
     playerCar->Update(deltaTime, moveForward, moveBackward, turnLeft, turnRight);
+    physicsManager.ConstrainToBounds(*playerCar);
 
     for (auto &collectible: collectibles) {
         if (!collectible->IsCollected()) {
@@ -82,7 +92,8 @@ void Level1::Update(float deltaTime) {
         obstacle->Update(deltaTime);
     }
 
-    CheckCollisions();
+    CheckCollectibleCollisions();
+    CheckObstacleCollisions();
 
     if (input->IsKeyDown(DIK_RETURN)) {
         goToEndScene = true;
@@ -100,7 +111,7 @@ void Level1::Update(float deltaTime) {
         goToEndScene = true;
     }
 
-    if (goToEndScene) {
+    if (goToEndScene && levelTimer.IsRunning()) {
         levelTimer.Stop();
         // The Game class will handle the actual transition and passing of data
         // call Game::TransitionToEndScene(...)
@@ -175,46 +186,29 @@ void Level1::CleanupFont() {
     }
 }
 
-void Level1::CheckCollisions() {
+void Level1::CheckCollectibleCollisions() {
     if (!playerCar) return;
-    RECT playerBox = playerCar->GetBoundingBox();
 
-    for (auto it = collectibles.begin(); it != collectibles.end(); ) {
-        Collectible* collectible = *it;
+    std::vector<Collectible *> toRemove;
+
+    for (Collectible *collectible: collectibles) {
         if (!collectible->IsCollected()) {
-            RECT collectibleBox = collectible->GetBoundingBox();
-            if (IntersectRect(nullptr, &playerBox, &collectibleBox)) {
+            if (playerCar->CarRectCollision(collectible->GetBoundingBox())) {
                 HandleCollectibleCollision(collectible);
-            }
-        }
-        ++it;
-    }
-
-    collectibles.erase(
-            std::remove_if(collectibles.begin(), collectibles.end(), [](Collectible *c) {
-                if (c->IsCollected()) {
-                    delete c;
-                    return true;
-                }
-                return false;
-            }),
-            collectibles.end());
-
-
-    for (auto &obstacle: obstacles) {
-        if (!obstacle->IsDisappearing()) {
-            RECT obstacleBox = obstacle->GetBoundingBox();
-            if (IntersectRect(nullptr, &playerBox, &obstacleBox)) {
-                HandleObstacleCollision(obstacle);
-                // Trigger collision effects on the obstacle
-                D3DXVECTOR2 carCenter = playerCar->GetPosition() + D3DXVECTOR2(playerCar->GetWidth() / 2.0f, playerCar->GetHeight() / 2.0f);
-                D3DXVECTOR2 obstacleCenter = obstacle->GetPosition() + D3DXVECTOR2(obstacle->GetSize().x / 2.0f, obstacle->GetSize().y / 2.0f);
-                D3DXVECTOR2 impactDirection = carCenter - obstacleCenter;
-                D3DXVec2Normalize(&impactDirection, &impactDirection);
-                obstacle->TriggerCollisionEffect(-impactDirection);
+                toRemove.push_back(collectible);
             }
         }
     }
+
+    for (Collectible *collectedItem: toRemove) {
+        collectibles.erase(std::remove(collectibles.begin(), collectibles.end(), collectedItem), collectibles.end());
+    }
+}
+
+void Level1::CheckObstacleCollisions() {
+    if (!playerCar) return;
+
+    physicsManager.CheckCarObstacleCollisions(*playerCar, obstacles);
 
     obstacles.erase(
             std::remove_if(obstacles.begin(), obstacles.end(), [](Obstacle *o) {
@@ -231,14 +225,7 @@ void Level1::HandleCollectibleCollision(Collectible *collectible) {
     if (!collectible->IsCollected()) {
         collectible->Collect();
         collectedCoinCount++;
-        sound->PlayButtonSound(1.0f, 0.0f); // sound placeholder
-    }
-}
-
-void Level1::HandleObstacleCollision(Obstacle *obstacle) {
-    if (!obstacle->IsCollided()) {
-        collisionCount++;
-        sound->PlayHitSound(1.0f, 0.0f);
+        sound->PlayCoinSound(0.0f);
     }
 }
 
