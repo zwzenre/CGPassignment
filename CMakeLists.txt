@@ -91,6 +91,8 @@ set(GAME_ASSETS
         assets/goal_sound.wav
         assets/main_menu_bgm.wav
         assets/start_countdown.wav
+        assets/exitBtn.png
+        assets/restartBtn.png
 )
 
 add_custom_command(
