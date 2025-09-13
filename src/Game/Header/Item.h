@@ -1,6 +1,6 @@
 #pragma once
-
 #include <d3dx9.h>
+#include "Racecar.h"
 
 class Item {
 public:
@@ -21,7 +21,7 @@ public:
     void SetPosition(D3DXVECTOR2 newPos) { position = newPos; }
     void SetSize(D3DXVECTOR2 newSize) { size = newSize; }
 
-    virtual void OnCollision(class RaceCar* car);
+    virtual void OnCollision(RaceCar* car) {};
 
 protected:
     IDirect3DDevice9* d3dDevice;

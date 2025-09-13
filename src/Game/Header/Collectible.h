@@ -1,5 +1,5 @@
 #pragma once
-#include "Header/Item.h"
+#include "Item.h"
 
 class Collectible : public Item {
 public:
