@@ -39,8 +39,8 @@ add_executable(Game main.cpp
         src/Game/Header/Collectible.h
         src/Game/Item.cpp
         src/Game/Header/Item.h
-#        src/Scene/EndScene.cpp
-#        src/Scene/Header/EndScene.h
+        src/Scene/EndScene.cpp
+        src/Scene/Header/EndScene.h
 )
 
 # USE THIS ONLY FOR int WINAPI WinMain() - WITHOUT CONSOLE OUTPUT
