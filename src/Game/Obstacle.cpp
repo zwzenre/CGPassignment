@@ -17,8 +17,8 @@ bool Obstacle::Initialize(IDirect3DDevice9* device) {
 
 void Obstacle::Update(float deltaTime) {
     switch (state) {
-        case Normal:
-            // Do nothing, obstacle is static
+        case Stationary:
+            // Do nothing, obstacle is stationary
             break;
         case Gliding: {
             position += glideDirection * glideSpeed * deltaTime;
