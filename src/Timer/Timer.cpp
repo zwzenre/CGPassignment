@@ -23,11 +23,9 @@ int Timer::FramesToUpdate() {
 
     intervalsSinceLastUpdate = (float)(timeNow.QuadPart - timePrevious.QuadPart);
 
-    framesToUpdate = (int)(intervalsSinceLastUpdate / intervalsPerFrame);
+    deltaTime = intervalsSinceLastUpdate / (float)timerFreq.QuadPart;
 
-    if (intervalsSinceLastUpdate > 0) {
-        deltaTime = intervalsSinceLastUpdate / (float)timerFreq.QuadPart;
-    }
+    framesToUpdate = (int)(intervalsSinceLastUpdate / intervalsPerFrame);
 
     if (framesToUpdate != 0) {
         timePrevious.QuadPart += (LONGLONG)(framesToUpdate * intervalsPerFrame);
@@ -36,20 +34,6 @@ int Timer::FramesToUpdate() {
     return framesToUpdate;
 }
 
-std::string Timer::GetTimer() {
-    float elapsed = GetElapsedTime();
-    elapsed = (((0.0f) > (elapsed)) ? (0.0f) : (elapsed));
-
-    int totalSeconds = static_cast<int>(elapsed);
-    int minutes = totalSeconds / 60;
-    int seconds = totalSeconds % 60;
-
-    std::stringstream ss;
-    ss << std::setfill('0') << std::setw(2) << minutes << ":"
-       << std::setfill('0') << std::setw(2) << seconds;
-
-    return ss.str();
-}
 
 float Timer::GetDeltaTime() {
     return deltaTime;
@@ -71,17 +55,5 @@ void Timer::Stop() {
     if (running) {
         QueryPerformanceCounter(&stopTime);
         running = false;
-    }
-}
-
-float Timer::GetElapsedTime() const {
-    if (startTime.QuadPart == 0) return 0.0f;
-
-    if (running) {
-        LARGE_INTEGER currentTime;
-        QueryPerformanceCounter(&currentTime);
-        return (float)(currentTime.QuadPart - startTime.QuadPart) / timerFreq.QuadPart;
-    } else {
-        return (float)(stopTime.QuadPart - startTime.QuadPart) / timerFreq.QuadPart;
     }
 }

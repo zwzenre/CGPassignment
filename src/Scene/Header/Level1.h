@@ -47,6 +47,9 @@ private:
     int collectedCoinCount;
     int collisionCount;
 
+    float countdownDuration;
+    float currentCountdownTime;
+
     const int TOTAL_COINS_FOR_STAR = 10;
     const float TIME_FOR_TWO_STARS = 120.0f;
     const int COLLISION_COUNT_FOR_THREE_STARS = 0;

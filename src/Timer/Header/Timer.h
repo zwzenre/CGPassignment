@@ -6,12 +6,10 @@ class Timer {
 public:
     void Init(int fps);
     int FramesToUpdate();
-    std::string GetTimer();
     float GetDeltaTime();
     float SecondsPerFrame() const;
     void Start();
     void Stop();
-    float GetElapsedTime() const;
     bool IsRunning() const { return running; }
 
 private:
