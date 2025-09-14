@@ -147,15 +147,16 @@ void Level1::Update(float deltaTime) {
         }
     }
 
-    if (allCoinsCollected || !timeRemaining || input->IsKeyDown(DIK_RETURN)) {
+    bool levelShouldEnd = allCoinsCollected || !timeRemaining || input->IsKeyDown(DIK_RETURN);
+
+    if (levelShouldEnd && !goToEndScene) {
         if (levelTimer.IsRunning()) {
             levelTimer.Stop();
             finalTime = countdownDuration - currentCountdownTime;
         }
-        if (allCoinsCollected && !timeRemaining) CalculateStars();
+        CalculateStars();
         goToEndScene = true;
     }
-
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
@@ -261,10 +262,15 @@ void Level1::CalculateStars() {
         totalStars = 1;
     }
 
-    std::cout << "Level End Results:" << std::endl;
+    std::cout << "Level End Results -" << std::endl;
     std::cout << "  Coins Collected: " << collectedCoinCount << "/" << TOTAL_COINS_FOR_STAR << std::endl;
     std::cout << "  Collisions: " << collisionCount << std::endl;
-    std::cout << "  Final Time: " << std::fixed << std::setprecision(2) << finalTime << "s" << std::endl;
+
+    if (finalTime < 120.0f) {
+        std::cout << "  Final Time: " << std::fixed << std::setprecision(2) << finalTime << "s" << std::endl;
+    } else {
+        std::cout << "  Final Time: DNF" << std::endl;
+    }
     std::cout << "  Total Stars: " << totalStars << std::endl;
 }
 
