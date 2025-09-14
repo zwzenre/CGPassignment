@@ -7,10 +7,11 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
 
 Level1::Level1()
         : device(nullptr), carTexture(nullptr),
-          input(nullptr), sound(nullptr), playerCar(nullptr),
+          input(nullptr), sound(nullptr), playerCar(nullptr), levelBg(nullptr),
           gameCursor(nullptr), fontBrush(nullptr),
           screenWidth(1920), screenHeight(1080),
           goToEndScene(false),
@@ -39,7 +40,6 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
 
     if (FAILED(D3DXCreateTextureFromFile(device, "assets/rock_road.png", &levelBg))) {
         MessageBox(nullptr, "Failed to load rock_road.png", "Error", MB_OK);
-        levelBg = nullptr;
     }
 
     playerCar = new RaceCar(D3DXVECTOR2(1280, 720), screenWidth, screenHeight);
@@ -94,6 +94,10 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
 
     levelTimer.Start();
     currentCountdownTime = countdownDuration;
+
+    totalStars = 0;
+    timeRemaining = true;
+    finalTime = 0.0f;
 }
 
 void Level1::Update(float deltaTime) {
@@ -127,7 +131,7 @@ void Level1::Update(float deltaTime) {
         currentCountdownTime -= deltaTime;
         if (currentCountdownTime <= 0.0f) {
             currentCountdownTime = 0.0f;
-            goToEndScene = true;
+            timeRemaining = false;
         }
     }
 
@@ -143,13 +147,15 @@ void Level1::Update(float deltaTime) {
         }
     }
 
-    if (allCoinsCollected) {
+    if (allCoinsCollected || !timeRemaining || input->IsKeyDown(DIK_RETURN)) {
+        if (levelTimer.IsRunning()) {
+            levelTimer.Stop();
+            finalTime = countdownDuration - currentCountdownTime;
+        }
+        if (allCoinsCollected && !timeRemaining) CalculateStars();
         goToEndScene = true;
     }
 
-    if (goToEndScene && levelTimer.IsRunning()) {
-        levelTimer.Stop();
-    }
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
@@ -169,8 +175,7 @@ void Level1::Render(LPD3DXSPRITE sprite) {
         D3DXMatrixTransformation2D(&mat, NULL, 0.0f, &scaling, NULL, 0.0f, &position);
         sprite->SetTransform(&mat);
 
-        D3DXVECTOR3 pos(0, 0, 0);
-        sprite->Draw(levelBg, NULL, NULL, &pos, D3DCOLOR_XRGB(255, 255, 255));
+        sprite->Draw(levelBg, NULL, NULL, NULL, D3DCOLOR_XRGB(255, 255, 255));
 
         D3DXMATRIX identity;
         D3DXMatrixIdentity(&identity);
@@ -191,7 +196,10 @@ void Level1::Render(LPD3DXSPRITE sprite) {
 }
 
 void Level1::Quit() {
-    if (levelBg) { levelBg->Release(); levelBg = nullptr; }
+    if (levelBg) {
+        levelBg->Release();
+        levelBg = nullptr;
+    }
 
     if (carTexture) {
         carTexture->Release();
@@ -240,6 +248,24 @@ void Level1::CleanupFont() {
         timerFont->Release();
         timerFont = nullptr;
     }
+}
+
+void Level1::CalculateStars() {
+    if (!timeRemaining) {
+        totalStars = 0;
+    } else if (collisionCount <= COLLISION_COUNT_FOR_THREE_STARS) {
+        totalStars = 3;
+    } else if (collisionCount <= COLLISION_COUNT_FOR_TWO_STARS) {
+        totalStars = 2;
+    } else {
+        totalStars = 1;
+    }
+
+    std::cout << "Level End Results:" << std::endl;
+    std::cout << "  Coins Collected: " << collectedCoinCount << "/" << TOTAL_COINS_FOR_STAR << std::endl;
+    std::cout << "  Collisions: " << collisionCount << std::endl;
+    std::cout << "  Final Time: " << std::fixed << std::setprecision(2) << finalTime << "s" << std::endl;
+    std::cout << "  Total Stars: " << totalStars << std::endl;
 }
 
 void Level1::CheckCollectibleCollisions() {

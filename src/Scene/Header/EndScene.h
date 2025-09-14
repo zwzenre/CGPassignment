@@ -17,6 +17,8 @@ private:
     LPDIRECT3DTEXTURE9 resultTexture = nullptr;    // resultScreen.png
     LPDIRECT3DTEXTURE9 restartBtnTexture = nullptr; // restartBtn.png
     LPDIRECT3DTEXTURE9 exitBtnTexture = nullptr;    // exitBtn.png
+    LPDIRECT3DTEXTURE9 starCompleteTexture = nullptr; // complete_star.png
+    LPDIRECT3DTEXTURE9 starIncompleteTexture = nullptr; // incomplete_star.png
 
     LPD3DXFONT font = nullptr;
 
@@ -29,6 +31,8 @@ private:
     // Button rects
     RECT restartBtnRect;
     RECT exitBtnRect;
+
+    int totalStars = 0;
 
 public:
     EndScene() = default;
@@ -48,4 +52,6 @@ public:
     bool IsRestartSelected() const { return restartSelected; }
     bool IsExitSelected() const { return exitRequested; }
     void ResetSelections() { restartSelected = false; exitRequested = false; }
+
+    void SetTotalStars(int stars) { totalStars = stars; }
 };

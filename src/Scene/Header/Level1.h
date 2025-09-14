@@ -23,16 +23,18 @@ public:
     bool WantsToGoToEndScene() const { return goToEndScene; }
     void ResetEndSceneRequest() { goToEndScene = false; }
 
+    int getTotalStars() { return totalStars; }
+
 private:
     IDirect3DDevice9* device;
     IDirect3DTexture9* carTexture;
+    IDirect3DTexture9* levelBg;
     InputManager* input;
     SoundManager* sound;
     RaceCar* playerCar;
     Cursor* gameCursor;
     LPD3DXFONT fontBrush;
     LPD3DXFONT timerFont;
-    LPDIRECT3DTEXTURE9 levelBg;
     int screenWidth;
     int screenHeight;
     HWND hWnd;
@@ -52,8 +54,12 @@ private:
     float currentCountdownTime;
 
     const int TOTAL_COINS_FOR_STAR = 10;
-    const float TIME_FOR_TWO_STARS = 120.0f;
-    const int COLLISION_COUNT_FOR_THREE_STARS = 0;
+    const int COLLISION_COUNT_FOR_TWO_STARS = 5;
+    const int COLLISION_COUNT_FOR_THREE_STARS = 3;
+
+    bool timeRemaining;
+    int totalStars;
+    float finalTime;
 
     void CreateFont();
     void CleanupFont();
@@ -62,4 +68,5 @@ private:
     void CheckObstacleCollisions();
     void HandleCollectibleCollision(Collectible* collectible);
     void DrawUI(LPD3DXSPRITE sprite);
+    void CalculateStars();
 };

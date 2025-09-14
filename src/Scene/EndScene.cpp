@@ -40,6 +40,16 @@ void EndScene::Init(IDirect3DDevice9* dev,
         exitBtnTexture = nullptr;
     }
 
+    if (FAILED(D3DXCreateTextureFromFile(device, "assets/complete_star.png", &starCompleteTexture))) {
+        MessageBox(nullptr, "Failed to load complete_star.png", "Error", MB_OK);
+        starCompleteTexture = nullptr;
+    }
+
+    if (FAILED(D3DXCreateTextureFromFile(device, "assets/incomplete_star.png", &starIncompleteTexture))) {
+        MessageBox(nullptr, "Failed to load incomplete_star.png", "Error", MB_OK);
+        starIncompleteTexture = nullptr;
+    }
+
     // Create font (safe check)
     if (device) {
         HRESULT hr = D3DXCreateFont(device, 28, 0, FW_BOLD, 1, FALSE,
@@ -163,19 +173,48 @@ void EndScene::Render(LPD3DXSPRITE spriteBrush) {
         spriteBrush->SetTransform(&id);
     }
 
-    // Message text
-    if (font && resultTexture) {
-        RECT textRect = boxRectLocal;
+//    // Message text
+//    if (font && resultTexture) {
+//        RECT textRect = boxRectLocal;
+//
+//        // shrink the text rect a little so it doesn't overlap the buttons
+//        int paddingTop = static_cast<int>((textRect.bottom - textRect.top) * 0.08f);
+//        int paddingSides = static_cast<int>((textRect.right - textRect.left) * 0.08f);
+//        textRect.left  += paddingSides;
+//        textRect.right -= paddingSides;
+//        textRect.top   += paddingTop;
+//        textRect.bottom = textRect.top + 80;
+//
+//        font->DrawText(spriteBrush, message.c_str(), -1, &textRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE, D3DCOLOR_XRGB(255,255,255));
+//    }
 
-        // shrink the text rect a little so it doesn't overlap the buttons
-        int paddingTop = static_cast<int>((textRect.bottom - textRect.top) * 0.12f);
-        int paddingSides = static_cast<int>((textRect.right - textRect.left) * 0.08f);
-        textRect.left  += paddingSides;
-        textRect.right -= paddingSides;
-        textRect.top   += paddingTop;
-        textRect.bottom = textRect.top + 80;
+    if (starCompleteTexture && starIncompleteTexture) {
+        D3DSURFACE_DESC starDesc;
+        starCompleteTexture->GetLevelDesc(0, &starDesc);
 
-        font->DrawText(spriteBrush, message.c_str(), -1, &textRect, DT_CENTER | DT_VCENTER | DT_SINGLELINE, D3DCOLOR_XRGB(255,255,255));
+        float starSize = 64.0f;
+        float starScale = starSize / static_cast<float>(starDesc.Width);
+        float totalStarsWidth = starSize * 3 + (starSize / 4) * 2; // 3 stars + 2 small gaps
+
+        float startX = (boxRectLocal.left + boxRectLocal.right - totalStarsWidth) * 0.5f;
+        float startY = boxRectLocal.top + (boxRectLocal.bottom - boxRectLocal.top) * 0.28f; // Position below title
+
+        for (int i = 0; i < 3; ++i) {
+            LPDIRECT3DTEXTURE9 currentStarTexture = (i < totalStars) ? starCompleteTexture : starIncompleteTexture;
+            D3DXVECTOR2 scaleVec(starScale, starScale);
+            D3DXVECTOR2 transVec(startX + i * (starSize + starSize / 4), startY);
+
+            D3DXMATRIX matStar;
+            D3DXMatrixTransformation2D(&matStar, nullptr, 0.0f, &scaleVec, nullptr, 0.0f, &transVec);
+            spriteBrush->SetTransform(&matStar);
+
+            D3DXVECTOR3 pos(0,0,0);
+            spriteBrush->Draw(currentStarTexture, nullptr, nullptr, &pos, D3DCOLOR_XRGB(255,255,255));
+        }
+
+        D3DXMATRIX id;
+        D3DXMatrixIdentity(&id);
+        spriteBrush->SetTransform(&id);
     }
 
     // Buttons
@@ -197,7 +236,7 @@ void EndScene::Render(LPD3DXSPRITE spriteBrush) {
 
         // Position
         float centerX = (boxRectLocal.left + boxRectLocal.right) * 0.5f;
-        float btnY = static_cast<float>(boxRectLocal.bottom) - btnHeight - 18.0f; // 18 px padding from box bottom
+        float btnY = static_cast<float>(boxRectLocal.bottom) - btnHeight - 35.0f; // 35 px padding from box bottom
 
         //
         float totalWidth = btnWidth * 2.0f + spacing;

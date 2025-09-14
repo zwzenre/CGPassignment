@@ -34,7 +34,7 @@ public:
     // Scene transition methods
     void InitializeMainMenu();
     void TransitionToLevel1();
-    void TransitionToEndScene();
+    void TransitionToEndScene(int totalStars);
     void TransitionToMainMenu();
     void HandleSceneTransitions();
 

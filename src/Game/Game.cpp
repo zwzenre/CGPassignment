@@ -74,10 +74,11 @@ void Game::TransitionToMainMenu() {
     std::cout << "Returned to Main Menu" << std::endl;
 }
 
-void Game::TransitionToEndScene() {
+void Game::TransitionToEndScene(int totalStars) {
     soundManager.StopBackgroundMusic();
     EndScene* endScene = new EndScene();
     sceneManager.ChangeScene(endScene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
+    if (endScene) endScene->SetTotalStars(totalStars);
     std::cout << "Transitioned to End Scene!" << std::endl;
 }
 
@@ -150,7 +151,8 @@ void Game::HandleSceneTransitions() {
         }
         if (level1->WantsToGoToEndScene()) {
             level1->ResetEndSceneRequest();
-            TransitionToEndScene();
+            int totalStars = level1->getTotalStars();
+            TransitionToEndScene(totalStars);
             return;
         }
     }
