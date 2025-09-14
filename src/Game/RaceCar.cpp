@@ -173,6 +173,25 @@ bool RaceCar::CarRectCollision(const RECT& other) const
              me.top    > other.bottom);
 }
 
+D3DXVECTOR2 RaceCar::GetCorner(int cornerIndex) const {
+    D3DXVECTOR2 localCorners[4];
+    localCorners[0] = D3DXVECTOR2(-frameWidth / 2.0f, -frameHeight / 2.0f);
+    localCorners[1] = D3DXVECTOR2( frameWidth / 2.0f, -frameHeight / 2.0f);
+    localCorners[2] = D3DXVECTOR2( frameWidth / 2.0f,  frameHeight / 2.0f);
+    localCorners[3] = D3DXVECTOR2(-frameWidth / 2.0f,  frameHeight / 2.0f);
+
+    D3DXMATRIX mat;
+    D3DXVECTOR2 center(0.0f, 0.0f);
+    D3DXMatrixTransformation2D(&mat, nullptr, 0.0f, &scale, &center, rotation, nullptr);
+
+    D3DXVECTOR2 transformedCorner;
+    D3DXVec2TransformCoord(&transformedCorner, &localCorners[cornerIndex], &mat);
+
+    D3DXVECTOR2 carRenderCenter = position + D3DXVECTOR2(GetWidth()/2.0f, GetHeight()/2.0f);
+
+    return carRenderCenter + transformedCorner;
+}
+
 void RaceCar::ClampToScreen()
 {
     float w = frameWidth  * scale.x;

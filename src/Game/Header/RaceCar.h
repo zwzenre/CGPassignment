@@ -54,6 +54,7 @@ public:
     // Collision
     RECT GetBoundingBox() const;
     bool CarRectCollision(const RECT& other) const;
+    D3DXVECTOR2 GetCorner(int cornerIndex) const;
 
     // --- Update/Render ---
     void Update(float deltaTime, bool moveForward, bool moveBackward,

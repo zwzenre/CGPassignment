@@ -19,9 +19,15 @@ void PhysicsManager::ConstrainToBounds(RaceCar& car) {
 bool PhysicsManager::CheckCarObstacleCollisions(RaceCar& car, std::vector<Obstacle*>& obstacles) {
     for (Obstacle* obstacle : obstacles) {
         if (!obstacle->IsDisappearing() && !obstacle->IsCollided()) {
-            if (car.CarRectCollision(obstacle->GetBoundingBox())) {
-                obstacle->OnCollision(&car);
-                return true;
+            RECT obstacleBox = obstacle->GetBoundingBox();
+
+            for (int i = 0; i < 4; ++i) {
+                D3DXVECTOR2 corner = car.GetCorner(i);
+                if (corner.x >= obstacleBox.left && corner.x <= obstacleBox.right &&
+                    corner.y >= obstacleBox.top  && corner.y <= obstacleBox.bottom) {
+                    obstacle->OnCollision(&car);
+                    return true;
+                }
             }
         }
     }

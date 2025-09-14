@@ -20,9 +20,13 @@ void Obstacle::Update(float deltaTime) {
             // Do nothing, obstacle/box is stationary
             break;
         case Gliding: {
-            position += glideDirection * glideSpeed * deltaTime;
-            glideTimer += deltaTime;
-            if (glideTimer >= 0.2f) {
+            D3DXVECTOR2 currentGlide = glideDirection * initialGlideSpeed * deltaTime;
+            position += currentGlide;
+            glidedDistance += D3DXVec2Length(&currentGlide);
+
+            initialGlideSpeed -= initialGlideSpeed * 2.0f * deltaTime;
+
+            if (glidedDistance >= glideDistance || initialGlideSpeed < 50.0f) {
                 state = Blinking;
                 blinkTimer = 0.0f;
                 blinkCount = 0;
@@ -46,9 +50,6 @@ void Obstacle::Update(float deltaTime) {
         }
         case Disappearing: {
             // Obstacle remains invisible. Level1 will handle actual deletion.
-//            disappearTimer += deltaTime;
-//            if (disappearTimer >= disappearDuration) {
-//            }
             break;
         }
     }
@@ -90,14 +91,24 @@ void Obstacle::OnCollision(RaceCar* car) {
         D3DXVECTOR2 impactDir = obstacleCenter - carCenter;
         D3DXVec2Normalize(&impactDir, &impactDir);
 
-        TriggerCollisionEffect(impactDir);
+        D3DXVECTOR2 velocity = car->GetVelocity();
+
+        TriggerCollisionEffect(impactDir, velocity);
     }
 }
 
-void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection) {
+void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection, D3DXVECTOR2 velocity) {
     if (state == Stationary) {
         state = Gliding;
         glideTimer = 0.0f;
         glideDirection = impactDirection;
     }
+
+    float carSpeedMagnitude = D3DXVec2Length(&velocity);
+
+    initialGlideSpeed = (carSpeedMagnitude * 0.5f) < 500.0f ? (carSpeedMagnitude * 0.5f) : 500.0f;
+    initialGlideSpeed = initialGlideSpeed > 150.0f ? initialGlideSpeed : 150.0f;
+
+    glideDistance = initialGlideSpeed * 0.15f;
+    glidedDistance = 0.0f;
 }
