@@ -83,11 +83,13 @@ set(GAME_ASSETS
         assets/button_round_line.png
         assets/car.png
         assets/cursor.png
+        assets/rock_road.png
+        assets/incomplete_star.png
+        assets/complete_star.png
         assets/exitBtn.png
         assets/restartBtn.png
         assets/coin.png
         assets/box.jpg
-        assets/rock_road.png
         assets/btn_pop.wav
         assets/car_drive.wav
         assets/gameplay_bgm.wav
