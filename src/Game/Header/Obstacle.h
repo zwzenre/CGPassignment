@@ -1,9 +1,10 @@
 #pragma once
 #include "Item.h"
+#include "RaceCar.h"
 
 class Obstacle : public Item {
 public:
-    Obstacle(D3DXVECTOR2 position, D3DXVECTOR2 size, const char* texturePath);
+    Obstacle(D3DXVECTOR2 position, D3DXVECTOR2 size, const char* texturePath, float mass = 1.0f);
     ~Obstacle() override;
 
     bool Initialize(IDirect3DDevice9* device) override;
@@ -14,8 +15,8 @@ public:
     D3DXVECTOR2 GetPosition() const { return Item::GetPosition(); }
     D3DXVECTOR2 GetSize() const { return Item::GetSize(); }
 
-    void OnCollision(class RaceCar* car) override;
-    void TriggerCollisionEffect(const D3DXVECTOR2& impactDirection, D3DXVECTOR2 velocity);
+    void OnCollision(RaceCar* car) override;
+    void TriggerCollisionEffect(const D3DXVECTOR2& impactDirection, float carMass, D3DXVECTOR2 carVelocity);
 
     bool IsDisappearing() const { return state == Disappearing; }
     bool IsGliding() const { return state == Gliding; }
@@ -30,12 +31,15 @@ private:
     };
     State state;
 
+    float mass;
+    float frictionCoefficient;
+
     float glideTimer;
     D3DXVECTOR2 glideDirection;
     float glideSpeed;
     float initialGlideSpeed;
-    float glideDistance;
     float glidedDistance;
+    float maxGlideDistance;
 
     float blinkTimer;
     float blinkInterval;

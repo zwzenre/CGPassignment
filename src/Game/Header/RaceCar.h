@@ -9,6 +9,7 @@ private:
     D3DXVECTOR2 velocity;
     float rotation;
     float currentSpeed;
+    float mass;
 
     // Physics params
     float enginePower;
@@ -36,7 +37,7 @@ private:
     int screenHeight;
 
 public:
-    RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH);
+    RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH, float carMass);
 
     // Getters / Setters
     D3DXVECTOR2 GetPosition() const { return position; }
@@ -50,6 +51,8 @@ public:
 
     int GetWidth()  const { return static_cast<int>(frameWidth  * scale.x); }
     int GetHeight() const { return static_cast<int>(frameHeight * scale.y); }
+
+    float GetMass() const { return mass; }
 
     // Collision
     RECT GetBoundingBox() const;

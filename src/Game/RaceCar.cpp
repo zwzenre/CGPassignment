@@ -5,9 +5,9 @@
 #undef min
 #undef max
 
-RaceCar::RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH)
+RaceCar::RaceCar(D3DXVECTOR2 startPos, int screenW, int screenH, float carMass)
     : position(startPos), velocity(0,0), rotation(0.0f),
-      enginePower(300.0f), maxSpeed(400.0f), currentSpeed(0.0f),
+      mass(carMass), enginePower(300.0f), maxSpeed(400.0f), currentSpeed(0.0f),
       accelerationRate(5.0f), decelerationRate(2.0f),
       brakePower(6.0f), dragCoefficient(0.05f),
       rollingResistance(0.02f), steeringAngle(0.0f),
