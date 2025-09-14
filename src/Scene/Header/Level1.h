@@ -32,6 +32,7 @@ private:
     Cursor* gameCursor;
     LPD3DXFONT fontBrush;
     LPD3DXFONT timerFont;
+    LPDIRECT3DTEXTURE9 levelBg;
     int screenWidth;
     int screenHeight;
     HWND hWnd;

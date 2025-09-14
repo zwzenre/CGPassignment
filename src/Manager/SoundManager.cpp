@@ -111,10 +111,10 @@ void SoundManager::LoadSounds() {
     result = hitSound->setMode(FMOD_LOOP_OFF);
 
     result = system->createStream("assets/main_menu_bgm.wav", FMOD_LOOP_NORMAL, 0, &mainMenuBgm);
-    result = mainMenuBgm->setMode(FMOD_LOOP_OFF);
+    result = mainMenuBgm->setMode(FMOD_LOOP_NORMAL);
 
-    result = system->createStream("assets/gameplay_bgm.wav", FMOD_DEFAULT, 0, &gameplayBgm);
-    result = gameplayBgm->setMode(FMOD_LOOP_OFF);
+    result = system->createStream("assets/gameplay_bgm.wav", FMOD_LOOP_NORMAL, 0, &gameplayBgm);
+    result = gameplayBgm->setMode(FMOD_LOOP_NORMAL);
 
     result = system->createSound("assets/start_countdown.wav", FMOD_DEFAULT, 0, &startCountdownSound);
     result = startCountdownSound->setMode(FMOD_LOOP_OFF);
