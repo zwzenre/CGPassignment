@@ -37,6 +37,11 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
         MessageBox(nullptr, "Failed to load car.png", "Error", MB_OK);
     }
 
+    if (FAILED(D3DXCreateTextureFromFile(device, "assets/rock_road.png", &levelBg))) {
+        MessageBox(nullptr, "Failed to load rock_road.png", "Error", MB_OK);
+        levelBg = nullptr;
+    }
+
     playerCar = new RaceCar(D3DXVECTOR2(1280, 720), screenWidth, screenHeight);
 
     gameCursor = input->GetCursor();
@@ -150,6 +155,28 @@ void Level1::Update(float deltaTime) {
 void Level1::Render(LPD3DXSPRITE sprite) {
     if (!carTexture || !playerCar) return;
 
+    if (levelBg) {
+        D3DSURFACE_DESC bgDesc;
+        levelBg->GetLevelDesc(0, &bgDesc);
+
+        float scaleX = (float)screenWidth / bgDesc.Width;
+        float scaleY = (float)screenHeight / bgDesc.Height;
+
+        D3DXVECTOR2 scaling(scaleX, scaleY);
+        D3DXVECTOR2 position(0.0f, 0.0f);
+
+        D3DXMATRIX mat;
+        D3DXMatrixTransformation2D(&mat, NULL, 0.0f, &scaling, NULL, 0.0f, &position);
+        sprite->SetTransform(&mat);
+
+        D3DXVECTOR3 pos(0, 0, 0);
+        sprite->Draw(levelBg, NULL, NULL, &pos, D3DCOLOR_XRGB(255, 255, 255));
+
+        D3DXMATRIX identity;
+        D3DXMatrixIdentity(&identity);
+        sprite->SetTransform(&identity);
+    }
+
     for (auto &obstacle: obstacles) {
         obstacle->Render(sprite);
     }
@@ -159,12 +186,13 @@ void Level1::Render(LPD3DXSPRITE sprite) {
             collectible->Render(sprite);
         }
     }
-
     playerCar->Render(sprite, carTexture);
     DrawUI(sprite);
 }
 
 void Level1::Quit() {
+    if (levelBg) { levelBg->Release(); levelBg = nullptr; }
+
     if (carTexture) {
         carTexture->Release();
         carTexture = nullptr;
@@ -192,7 +220,7 @@ void Level1::Quit() {
 
 void Level1::CreateFont() {
     if (device) {
-        D3DXCreateFont(device, 18, 0, FW_BOLD, 1, false,
+        D3DXCreateFont(device, 36, 0, FW_BOLD, 1, false,
                        DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, DEFAULT_QUALITY,
                        DEFAULT_PITCH | FF_DONTCARE, "Arial", &fontBrush);
 
@@ -273,16 +301,16 @@ void Level1::DrawUI(LPD3DXSPRITE sprite) {
     ssTimer << "Time Left: " << std::setfill('0') << std::setw(2) << minutes << ":"
             << std::setfill('0') << std::setw(2) << seconds;
 
-    RECT timerRect = {screenWidth - 350, 20, screenWidth - 20, 100};
+    RECT timerRect = {screenWidth - 350, 20, screenWidth - 20, 50};
     timerFont->DrawTextA(sprite, ssTimer.str().c_str(), -1, &timerRect, DT_RIGHT | DT_VCENTER, D3DCOLOR_XRGB(255, 255, 0));
 
     std::stringstream ssCoins;
     ssCoins << "Coins: " << collectedCoinCount << "/" << TOTAL_COINS_FOR_STAR;
-    RECT coinsRect = {20, 20, 250, 100};
+    RECT coinsRect = {20, 10, 250, 50};
     fontBrush->DrawTextA(sprite, ssCoins.str().c_str(), -1, &coinsRect, DT_LEFT | DT_VCENTER, D3DCOLOR_XRGB(0, 255, 0));
 
     std::stringstream ssCollisions;
     ssCollisions << "Box Broken: " << collisionCount;
-    RECT collisionsRect = {20, 100, 250, 180};
+    RECT collisionsRect = {20, 30, 250, 100};
     fontBrush->DrawTextA(sprite, ssCollisions.str().c_str(), -1, &collisionsRect, DT_LEFT | DT_VCENTER, D3DCOLOR_XRGB(255, 100, 0));
 }

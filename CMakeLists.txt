@@ -87,6 +87,7 @@ set(GAME_ASSETS
         assets/restartBtn.png
         assets/coin.png
         assets/box.jpg
+        assets/rock_road.png
         assets/btn_pop.wav
         assets/car_drive.wav
         assets/gameplay_bgm.wav
