@@ -21,16 +21,12 @@ add_executable(Game main.cpp
         src/Manager/Header/PhysicsManager.h
         src/Scene/Level1.cpp
         src/Scene/Header/Level1.h
-        src/Game/Map.cpp
-        src/Game/Header/Map.h
         src/Game/Obstacle.cpp
         src/Game/Header/Obstacle.h
         src/Game/RaceCar.cpp
         src/Game/Header/RaceCar.h
         src/Scene/MainMenuScene.cpp
         src/Scene/Header/MainMenuScene.h
-        src/Scene/SelectStageScene.cpp
-        src/Scene/Header/SelectStageScene.h
         src/Scene/Header/Scene.h
         src/Scene/MainMenuScene.cpp
         src/Game/Cursor.cpp

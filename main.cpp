@@ -22,9 +22,9 @@ int main() {
         game.GetDevice(),
         game.GetInputManager(),
         game.GetSoundManager(),
-        game.GetWindowHandle(),  // Add HWND parameter
-        game.GetWindowWidth(),   // Add screen width
-        game.GetWindowHeight()   // Add screen height
+        game.GetWindowHandle(),
+        game.GetWindowWidth(),
+        game.GetWindowHeight()
     );
 
     // Run the main game loop
