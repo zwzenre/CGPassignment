@@ -131,19 +131,6 @@ void Game::HandleSceneTransitions() {
     Scene* currentScene = sceneManager.GetCurrentScene();
     if (!currentScene) return;
 
-    // Main Menu
-    if (auto mainMenu = dynamic_cast<MainMenuScene*>(currentScene)) {
-        if (mainMenu->IsPlayButtonClicked()) {
-            mainMenu->ResetPlayButton();
-            TransitionToLevel1();
-            return;
-        }
-        if (inputManager.IsKeyDown(DIK_ESCAPE)) {
-            PostQuitMessage(0);
-            return;
-        }
-    }
-
     // Level1
     if (auto level1 = dynamic_cast<Level1*>(currentScene)) {
         if (inputManager.IsKeyDown(DIK_ESCAPE)) {
@@ -154,6 +141,19 @@ void Game::HandleSceneTransitions() {
             level1->ResetEndSceneRequest();
             int totalStars = level1->getTotalStars();
             TransitionToEndScene(totalStars);
+            return;
+        }
+    }
+
+    // Main Menu
+    if (auto mainMenu = dynamic_cast<MainMenuScene*>(currentScene)) {
+        if (mainMenu->IsPlayButtonClicked()) {
+            mainMenu->ResetPlayButton();
+            TransitionToLevel1();
+            return;
+        }
+        if (inputManager.IsKeyDown(DIK_ESCAPE)) {
+            PostQuitMessage(0);
             return;
         }
     }

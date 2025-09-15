@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Scene/Header/Scene.h"
+#include "SoundManager.h"
 
 class SceneManager {
 private:

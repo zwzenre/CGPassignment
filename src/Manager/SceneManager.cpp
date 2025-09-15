@@ -8,6 +8,11 @@ SceneManager::~SceneManager() {
 
 void SceneManager::ChangeScene(Scene* newScene, IDirect3DDevice9* device, InputManager* inputMgr,
                               SoundManager* soundMgr, HWND hWnd, int screenWidth, int screenHeight) {
+
+    if (soundMgr) {
+        soundMgr->StopBackgroundMusic();
+    }
+
     if (currentScene) {
         currentScene->Quit();
         delete currentScene;
