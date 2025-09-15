@@ -14,6 +14,7 @@ SoundManager::SoundManager() {
     boxSound = nullptr;
     channel = nullptr;
     extradriverdata = nullptr;
+    carChannel = nullptr;
 }
 
 SoundManager::~SoundManager() {
@@ -45,10 +46,22 @@ void SoundManager::InitializeAudio() {
 }
 
 //car drive
-void SoundManager::PlayCarSound(float pitch, float pan) {
-    result = system->playSound(carSound, 0, false, &channel);
-    channel->setPitch(pitch);
-    channel->setPan(pan);
+void SoundManager::PlayCarSound(float pitch, float pan, float volume) {
+    bool isPlaying = false;
+    carChannel->setVolume(volume);
+    if (carChannel) {
+        carChannel->isPlaying(&isPlaying);
+    }
+
+    if (!isPlaying) {
+        result = system->playSound(carSound, 0, false, &carChannel);
+        if (carChannel) {
+            carChannel->setPitch(pitch);
+            carChannel->setPan(pan);
+        }
+    }
+
+
 }
 
 //car hit box
@@ -64,8 +77,9 @@ void SoundManager::PlayMainMenuBgm() {
 }
 
 //gameplay bgm
-void SoundManager::PlayGameplayBgm() {
+void SoundManager::PlayGameplayBgm(float volume) {
     result = system->playSound(gameplayBgm, 0, false, &channel);
+    channel->setVolume(volume);
 }
 
 //start countdown
@@ -123,7 +137,7 @@ void SoundManager::LoadSounds() {
     result = goalSound->setMode(FMOD_LOOP_OFF);
 
     result = system->createSound("assets/car_drive.wav", FMOD_DEFAULT, 0, &carSound);
-    result = carSound->setMode(FMOD_LOOP_OFF);
+    result = carSound->setMode(FMOD_LOOP_NORMAL);
 
     result = system->createSound("assets/btn_pop.wav", FMOD_DEFAULT, 0, &buttonSound);
     result = buttonSound->setMode(FMOD_LOOP_OFF);
@@ -142,5 +156,17 @@ void SoundManager::UpdateSound() {
 void SoundManager::StopBackgroundMusic() {
     if (channel) {
         channel->stop();
+    }
+}
+
+
+void SoundManager::StopCarSound() {
+    if (carChannel) {
+        bool isPlaying = false;
+        carChannel->isPlaying(&isPlaying);
+        if (isPlaying) {
+            carChannel->stop();
+        }
+        carChannel = nullptr;
     }
 }
