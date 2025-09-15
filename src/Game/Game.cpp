@@ -76,6 +76,7 @@ void Game::TransitionToMainMenu() {
 
 void Game::TransitionToEndScene(int totalStars) {
     soundManager.StopBackgroundMusic();
+    soundManager.PlayGoalSound(1.0f, 0.0f);
     EndScene* endScene = new EndScene();
     sceneManager.ChangeScene(endScene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
     if (endScene) endScene->SetTotalStars(totalStars);

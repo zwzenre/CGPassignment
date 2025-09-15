@@ -157,6 +157,9 @@ void SoundManager::StopBackgroundMusic() {
     if (channel) {
         channel->stop();
     }
+    if (carChannel) {
+        carChannel->stop();
+    }
 }
 
 
