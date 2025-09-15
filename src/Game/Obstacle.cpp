@@ -129,3 +129,22 @@ void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection, float 
         maxGlideDistance = max(50.0f, min(maxGlideDistance, 500.0f));
     }
 }
+
+std::vector<D3DXVECTOR2> Obstacle::GetOBBVertices() const {
+    std::vector<D3DXVECTOR2> vertices(4);
+
+    vertices[0] = position;
+    vertices[1] = position + D3DXVECTOR2(size.x, 0.0f);
+    vertices[2] = position + D3DXVECTOR2(size.x, size.y);
+    vertices[3] = position + D3DXVECTOR2(0.0f, size.y);
+
+    return vertices;
+}
+
+std::vector<D3DXVECTOR2> Obstacle::GetOBBAxes() const {
+    std::vector<D3DXVECTOR2> axes(2);
+
+    axes[0] = D3DXVECTOR2(1.0f, 0.0f);
+    axes[1] = D3DXVECTOR2(0.0f, 1.0f);
+    return axes;
+}

@@ -1,6 +1,7 @@
 #pragma once
 #include <d3dx9math.h>
 #include <d3dx9.h>
+#include <vector>
 
 class RaceCar {
 private:
@@ -57,7 +58,10 @@ public:
     // Collision
     RECT GetBoundingBox() const;
     bool CarRectCollision(const RECT& other) const;
-    D3DXVECTOR2 GetCorner(int cornerIndex) const;
+
+    // OBB Collision Methods
+    std::vector<D3DXVECTOR2> GetOBBVertices() const;
+    std::vector<D3DXVECTOR2> GetOBBAxes() const;
 
     // --- Update/Render ---
     void Update(float deltaTime, bool moveForward, bool moveBackward,
