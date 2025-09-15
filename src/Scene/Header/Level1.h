@@ -40,6 +40,7 @@ private:
     HWND hWnd;
 
     bool goToEndScene;
+    bool wasMovingLastFrame;
 
     std::vector<Collectible*> collectibles;
     std::vector<Obstacle*> obstacles;

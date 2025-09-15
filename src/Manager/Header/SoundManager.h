@@ -14,14 +14,15 @@ public:
     * coinSound, * boxSound;
 
     FMOD::Channel * channel = 0; // Buffer
+    FMOD::Channel* carChannel;
     FMOD_RESULT result; // HRESULT
     void * extradriverdata = 0; // Nothing
 
     void InitializeAudio();
-    void PlayCarSound(float pitch, float pan);
+    void PlayCarSound(float pitch, float pan, float volume);
     void PlayHitSound(float pitch, float pan);
     void PlayMainMenuBgm();
-    void PlayGameplayBgm();
+    void PlayGameplayBgm(float volume);
     void PlayStartCountdown(float pitch, float pan);
     void PlayGoalSound(float pitch, float pan);
     void PlayButtonSound(float pitch, float pan);
@@ -32,4 +33,6 @@ public:
     void UpdateSound();
     void cleanup();
     void StopBackgroundMusic();
+    void StopCarSound();
+
 };
