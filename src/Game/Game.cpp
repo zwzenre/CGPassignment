@@ -159,9 +159,15 @@ void Game::HandleSceneTransitions() {
     }
 
     // End Scene
-    if (auto endScene = dynamic_cast<EndScene*>(currentScene)) {
+    if (auto endScene = dynamic_cast<EndScene*>(currentScene))
+    {
         if (endScene->IsExitSelected()) {
             PostQuitMessage(0);
+            return;
+        }
+        if (endScene->IsRestartSelected()) {
+            endScene->ResetSelections();
+            TransitionToLevel1();
             return;
         }
     }
