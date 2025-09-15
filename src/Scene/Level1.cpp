@@ -14,7 +14,7 @@ Level1::Level1()
           input(nullptr), sound(nullptr), playerCar(nullptr), levelBg(nullptr),
           gameCursor(nullptr), fontBrush(nullptr),
           screenWidth(1920), screenHeight(1080),
-          goToEndScene(false),
+          goToEndScene(false), wasMovingLastFrame(false),
           physicsManager(screenWidth, screenHeight),
           collectedCoinCount(0), collisionCount(0),
           countdownDuration(120.0f),
@@ -110,6 +110,16 @@ void Level1::Update(float deltaTime) {
     bool moveBackward = input->IsKeyDown(DIK_DOWN) || input->IsKeyDown(DIK_S);
     bool turnLeft = input->IsKeyDown(DIK_LEFT) || input->IsKeyDown(DIK_A);
     bool turnRight = input->IsKeyDown(DIK_RIGHT) || input->IsKeyDown(DIK_D);
+
+    bool isMovingNow = moveForward || moveBackward;
+
+    if (isMovingNow && !wasMovingLastFrame) {
+        sound->PlayCarSound(1.0f, 0.0f, 2.0f);
+    } else if (!isMovingNow && wasMovingLastFrame) {
+        sound->StopCarSound();
+    }
+
+    wasMovingLastFrame = isMovingNow;
 
     playerCar->Update(deltaTime, moveForward, moveBackward, turnLeft, turnRight);
     physicsManager.ConstrainToBounds(*playerCar);

@@ -62,7 +62,7 @@ void Game::TransitionToLevel1() {
     soundManager.StopBackgroundMusic();
     Level1* level1Scene = new Level1();
     sceneManager.ChangeScene(level1Scene, d3dDevice, &inputManager, &soundManager, hWnd, windowWidth, windowHeight);
-    soundManager.PlayGameplayBgm();
+    soundManager.PlayGameplayBgm(0.2f);
     std::cout << "Transitioned to Level 1" << std::endl;
 }
 
