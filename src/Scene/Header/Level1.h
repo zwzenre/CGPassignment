@@ -3,7 +3,7 @@
 #include "../../Manager/Header/InputManager.h"
 #include "../../Manager/Header/SoundManager.h"
 #include "../../Manager/Header/PhysicsManager.h"
-#include "../../Timer/Header/Timer.h"
+#include "../../Manager/Header/Timer.h"
 #include "../../Game/Header/RaceCar.h"
 #include "../../Game/Header/Collectible.h"
 #include "../../Game/Header/Obstacle.h"

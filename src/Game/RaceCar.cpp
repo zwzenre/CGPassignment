@@ -1,6 +1,7 @@
 #include "Header/RaceCar.h"
 #include <cmath>
 #include <algorithm>
+#include <vector>
 
 #undef min
 #undef max
@@ -173,23 +174,48 @@ bool RaceCar::CarRectCollision(const RECT& other) const
              me.top    > other.bottom);
 }
 
-D3DXVECTOR2 RaceCar::GetCorner(int cornerIndex) const {
-    D3DXVECTOR2 localCorners[4];
-    localCorners[0] = D3DXVECTOR2(-frameWidth / 2.0f, -frameHeight / 2.0f);
-    localCorners[1] = D3DXVECTOR2( frameWidth / 2.0f, -frameHeight / 2.0f);
-    localCorners[2] = D3DXVECTOR2( frameWidth / 2.0f,  frameHeight / 2.0f);
-    localCorners[3] = D3DXVECTOR2(-frameWidth / 2.0f,  frameHeight / 2.0f);
+std::vector<D3DXVECTOR2> RaceCar::GetOBBVertices() const {
+    std::vector<D3DXVECTOR2> vertices(4);
 
-    D3DXMATRIX mat;
-    D3DXVECTOR2 center(0.0f, 0.0f);
-    D3DXMatrixTransformation2D(&mat, nullptr, 0.0f, &scale, &center, rotation, nullptr);
+    float scaledWidth = frameWidth * scale.x;
+    float scaledHeight = frameHeight * scale.y;
 
-    D3DXVECTOR2 transformedCorner;
-    D3DXVec2TransformCoord(&transformedCorner, &localCorners[cornerIndex], &mat);
+    D3DXVECTOR2 localCorners[4] = {
+            {-scaledWidth / 2.0f, -scaledHeight / 2.0f},
+            { scaledWidth / 2.0f, -scaledHeight / 2.0f},
+            { scaledWidth / 2.0f,  scaledHeight / 2.0f},
+            {-scaledWidth / 2.0f,  scaledHeight / 2.0f}
+    };
 
-    D3DXVECTOR2 carRenderCenter = position + D3DXVECTOR2(GetWidth()/2.0f, GetHeight()/2.0f);
+    D3DXVECTOR2 carCenter = position + D3DXVECTOR2(scaledWidth / 2.0f, scaledHeight / 2.0f);
 
-    return carRenderCenter + transformedCorner;
+    D3DXMATRIX rotationMatrix;
+    D3DXMatrixRotationZ(&rotationMatrix, rotation);
+
+    for (int i = 0; i < 4; ++i) {
+        D3DXVECTOR4 rotatedCorner;
+        D3DXVec2Transform(&rotatedCorner, &localCorners[i], &rotationMatrix);
+        vertices[i] = D3DXVECTOR2(rotatedCorner.x, rotatedCorner.y) + carCenter;
+    }
+    return vertices;
+}
+
+std::vector<D3DXVECTOR2> RaceCar::GetOBBAxes() const {
+    std::vector<D3DXVECTOR2> axes(2);
+
+    // Get two adjacent vertices
+    std::vector<D3DXVECTOR2> vertices = GetOBBVertices();
+    D3DXVECTOR2 edge1 = vertices[1] - vertices[0];
+    D3DXVECTOR2 edge2 = vertices[3] - vertices[0];
+
+    // Normalize and get perpendicular for the axes
+    D3DXVec2Normalize(&axes[0], &edge1);
+    D3DXVec2Normalize(&axes[1], &edge2);
+
+    axes[0] = D3DXVECTOR2(-axes[0].y, axes[0].x);
+    axes[1] = D3DXVECTOR2(-axes[1].y, axes[1].x);
+
+    return axes;
 }
 
 void RaceCar::ClampToScreen()

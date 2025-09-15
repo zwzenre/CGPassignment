@@ -1,6 +1,7 @@
 #pragma once
 #include "Item.h"
 #include "RaceCar.h"
+#include <vector>
 
 class Obstacle : public Item {
 public:
@@ -21,6 +22,10 @@ public:
     bool IsDisappearing() const { return state == Disappearing; }
     bool IsGliding() const { return state == Gliding; }
     bool IsCollided() const { return state != Stationary; }
+
+    // OBB Collision Methods
+    std::vector<D3DXVECTOR2> GetOBBVertices() const;
+    std::vector<D3DXVECTOR2> GetOBBAxes() const;
 
 private:
     enum State {

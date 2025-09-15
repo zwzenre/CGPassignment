@@ -118,9 +118,6 @@ void SoundManager::PlaySoundTrack() {
 }
 
 void SoundManager::LoadSounds() {
-    // result = system->createStream("../assets/659278__seth_makes_sounds__lofi-guitar-beat-70bpm.wav", FMOD_DEFAULT, 0, &sound2);
-    // result = sound2->setMode(FMOD_LOOP_OFF);
-
     result = system->createSound("assets/128294__xenonn__layered-gunshot-2.wav", FMOD_DEFAULT, 0, &hitSound);
     result = hitSound->setMode(FMOD_LOOP_OFF);
 
