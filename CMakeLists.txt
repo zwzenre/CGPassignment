@@ -11,8 +11,8 @@ add_executable(Game main.cpp
         src/Game/Header/Game.h
         src/Manager/InputManager.cpp
         src/Manager/Header/InputManager.h
-        src/Timer/Timer.cpp
-        src/Timer/Header/Timer.h
+        src/Manager/Timer.cpp
+        src/Manager/Header/Timer.h
         src/Manager/SceneManager.cpp
         src/Manager/Header/SceneManager.h
         src/Manager/SoundManager.cpp

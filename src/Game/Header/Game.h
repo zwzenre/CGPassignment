@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <d3d9.h>
 #include <d3dx9.h>
-#include "../../Timer/Header/Timer.h"
+#include "../../Manager/Header/Timer.h"
 #include "../../Manager/Header/InputManager.h"
 #include "../../Manager/Header/SoundManager.h"
 #include "../../Manager/Header/SceneManager.h"
