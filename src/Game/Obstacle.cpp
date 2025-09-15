@@ -1,10 +1,12 @@
 #include "Header/Obstacle.h"
-#include <algorithm>
 
-Obstacle::Obstacle(D3DXVECTOR2 position, D3DXVECTOR2 size, const char* texturePath)
+Obstacle::Obstacle(D3DXVECTOR2 position, D3DXVECTOR2 size, const char* texturePath, float mass)
         : Item(position, size, texturePath),
           state(Stationary),
-          glideTimer(0.0f), glideDirection(0, 0), glideSpeed(100.0f),
+          mass(mass),
+          frictionCoefficient(1.2f),
+          glideTimer(0.0f), glideDirection(0, 0), glideSpeed(0.0f),
+          initialGlideSpeed(0.0f), glidedDistance(0.0f), maxGlideDistance(0.0f),
           blinkTimer(0.0f), blinkInterval(0.1f), blinkCount(0),
           disappearTimer(0.0f), disappearDuration(0.5f), currentlyVisible(true) {}
 
@@ -20,13 +22,27 @@ void Obstacle::Update(float deltaTime) {
             // Do nothing, obstacle/box is stationary
             break;
         case Gliding: {
-            position += glideDirection * glideSpeed * deltaTime;
-            glideTimer += deltaTime;
-            if (glideTimer >= 0.2f) {
+            if (glideSpeed > 0.1f) {
+                D3DXVECTOR2 currentDisplacement = glideDirection * glideSpeed * deltaTime;
+                position += currentDisplacement;
+                glidedDistance += D3DXVec2Length(&currentDisplacement);
+
+                // Apply friction to slow down the obstacle
+                glideSpeed -= frictionCoefficient * deltaTime * 100.0f;
+
+                if (glidedDistance >= maxGlideDistance || glideSpeed <= 0.1f) {
+                    state = Blinking;
+                    blinkTimer = 0.0f;
+                    blinkCount = 0;
+                    currentlyVisible = true;
+                    glideSpeed = 0.0f;
+                }
+            } else {
                 state = Blinking;
                 blinkTimer = 0.0f;
                 blinkCount = 0;
                 currentlyVisible = true;
+                glideSpeed = 0.0f;
             }
             break;
         }
@@ -46,9 +62,6 @@ void Obstacle::Update(float deltaTime) {
         }
         case Disappearing: {
             // Obstacle remains invisible. Level1 will handle actual deletion.
-//            disappearTimer += deltaTime;
-//            if (disappearTimer >= disappearDuration) {
-//            }
             break;
         }
     }
@@ -90,14 +103,29 @@ void Obstacle::OnCollision(RaceCar* car) {
         D3DXVECTOR2 impactDir = obstacleCenter - carCenter;
         D3DXVec2Normalize(&impactDir, &impactDir);
 
-        TriggerCollisionEffect(impactDir);
+        TriggerCollisionEffect(impactDir, car->GetMass(), car->GetVelocity());
     }
 }
 
-void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection) {
+void Obstacle::TriggerCollisionEffect(const D3DXVECTOR2& impactDirection, float carMass, D3DXVECTOR2 carVelocity) {
     if (state == Stationary) {
         state = Gliding;
         glideTimer = 0.0f;
         glideDirection = impactDirection;
+        glidedDistance = 0.0f;
+
+        // Calculate initial glide speed
+        float carSpeedMagnitude = D3DXVec2Length(&carVelocity);
+        float effectiveImpulse = carMass * carSpeedMagnitude;
+
+        initialGlideSpeed = effectiveImpulse / this->mass * 0.5f;
+
+        // Clamp initial speed to a reasonable range
+        initialGlideSpeed = max(100.0f, min(initialGlideSpeed, 600.0f));
+
+        glideSpeed = initialGlideSpeed;
+
+        maxGlideDistance = ((initialGlideSpeed * initialGlideSpeed) / (2 * (frictionCoefficient * 100.0f))) * 0.6f;
+        maxGlideDistance = max(50.0f, min(maxGlideDistance, 500.0f));
     }
 }

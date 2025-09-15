@@ -55,8 +55,8 @@ private:
     float currentCountdownTime;
 
     const int TOTAL_COINS_FOR_STAR = 10;
-    const int COLLISION_COUNT_FOR_TWO_STARS = 5;
-    const int COLLISION_COUNT_FOR_THREE_STARS = 3;
+    const int COLLISION_COUNT_FOR_TWO_STARS = 8;
+    const int COLLISION_COUNT_FOR_THREE_STARS = 5;
 
     bool timeRemaining;
     int totalStars;

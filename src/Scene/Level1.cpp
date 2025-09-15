@@ -42,7 +42,7 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
         MessageBox(nullptr, "Failed to load rock_road.png", "Error", MB_OK);
     }
 
-    playerCar = new RaceCar(D3DXVECTOR2(1280, 720), screenWidth, screenHeight);
+    playerCar = new RaceCar(D3DXVECTOR2(1280, 720), screenWidth, screenHeight, 100.0f);
 
     gameCursor = input->GetCursor();
 
@@ -63,30 +63,30 @@ void Level1::Init(IDirect3DDevice9 *device, InputManager *inputMgr, SoundManager
         collectible->Initialize(device);
     }
 
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(100, 100), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(200, 120), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(150, 250), D3DXVECTOR2(80, 80), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(280, 200), D3DXVECTOR2(56, 56), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(600, 80), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(700, 150), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(850, 100), D3DXVECTOR2(56, 56), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1500, 180), D3DXVECTOR2(80, 80), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1650, 250), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1400, 300), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(100, 450), D3DXVECTOR2(56, 56), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(250, 500), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(180, 650), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(400, 800), D3DXVECTOR2(80, 80), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(500, 900), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(300, 950), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1200, 850), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1400, 900), D3DXVECTOR2(56, 56), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1600, 800), D3DXVECTOR2(80, 80), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(900, 450), D3DXVECTOR2(64, 64), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1050, 500), D3DXVECTOR2(72, 72), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(750, 550), D3DXVECTOR2(56, 56), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(1150, 700), D3DXVECTOR2(80, 80), "assets/box.jpg"));
-    obstacles.push_back(new Obstacle(D3DXVECTOR2(650, 700), D3DXVECTOR2(64, 64), "assets/box.jpg"));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(100, 100), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(200, 120), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(150, 250), D3DXVECTOR2(80, 80), "assets/box.jpg", 80.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(280, 200), D3DXVECTOR2(56, 56), "assets/box.jpg", 56.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(600, 80), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(700, 150), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(850, 100), D3DXVECTOR2(56, 56), "assets/box.jpg", 56.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1500, 180), D3DXVECTOR2(80, 80), "assets/box.jpg", 80.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1650, 250), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1400, 300), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(100, 450), D3DXVECTOR2(56, 56), "assets/box.jpg", 56.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(250, 500), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(180, 650), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(400, 800), D3DXVECTOR2(80, 80), "assets/box.jpg", 80.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(500, 900), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(300, 950), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1200, 850), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1400, 900), D3DXVECTOR2(56, 56), "assets/box.jpg", 56.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1600, 800), D3DXVECTOR2(80, 80), "assets/box.jpg", 80.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(900, 450), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1050, 500), D3DXVECTOR2(72, 72), "assets/box.jpg", 72.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(750, 550), D3DXVECTOR2(56, 56), "assets/box.jpg", 56.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(1150, 700), D3DXVECTOR2(80, 80), "assets/box.jpg", 80.0f));
+    obstacles.push_back(new Obstacle(D3DXVECTOR2(650, 700), D3DXVECTOR2(64, 64), "assets/box.jpg", 64.0f));
 
     for (auto &obstacle : obstacles) {
         obstacle->Initialize(device);
@@ -157,15 +157,16 @@ void Level1::Update(float deltaTime) {
         }
     }
 
-    if (allCoinsCollected || !timeRemaining || input->IsKeyDown(DIK_RETURN)) {
+    bool levelShouldEnd = allCoinsCollected || !timeRemaining || input->IsKeyDown(DIK_RETURN);
+
+    if (levelShouldEnd && !goToEndScene) {
         if (levelTimer.IsRunning()) {
             levelTimer.Stop();
             finalTime = countdownDuration - currentCountdownTime;
         }
-        if (allCoinsCollected && !timeRemaining) CalculateStars();
+        CalculateStars();
         goToEndScene = true;
     }
-
 }
 
 void Level1::Render(LPD3DXSPRITE sprite) {
@@ -271,10 +272,15 @@ void Level1::CalculateStars() {
         totalStars = 1;
     }
 
-    std::cout << "Level End Results:" << std::endl;
+    std::cout << "Level End Results -" << std::endl;
     std::cout << "  Coins Collected: " << collectedCoinCount << "/" << TOTAL_COINS_FOR_STAR << std::endl;
     std::cout << "  Collisions: " << collisionCount << std::endl;
-    std::cout << "  Final Time: " << std::fixed << std::setprecision(2) << finalTime << "s" << std::endl;
+
+    if (finalTime < 120.0f) {
+        std::cout << "  Final Time: " << std::fixed << std::setprecision(2) << finalTime << "s" << std::endl;
+    } else {
+        std::cout << "  Final Time: DNF" << std::endl;
+    }
     std::cout << "  Total Stars: " << totalStars << std::endl;
 }
 
